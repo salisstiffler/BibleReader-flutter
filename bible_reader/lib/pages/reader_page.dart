@@ -35,7 +35,7 @@ class _ReaderPageState extends State<ReaderPage> {
     if (_previousBookIndex != provider.selectedBookIndex ||
         _previousChapterIndex != provider.selectedChapterIndex) {
       if (_scrollController.hasClients) {
-        _scrollController.jumpTo(0);
+        _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
       _previousBookIndex = provider.selectedBookIndex;
       _previousChapterIndex = provider.selectedChapterIndex;
@@ -55,7 +55,7 @@ class _ReaderPageState extends State<ReaderPage> {
       barrierDismissible: true,
       barrierLabel: 'ChapterSelector',
       barrierColor: Colors.black.withOpacity(0.6),
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (context, animation, secondaryAnimation) {
         return BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -75,7 +75,7 @@ class _ReaderPageState extends State<ReaderPage> {
           opacity: animation,
           child: ScaleTransition(
             scale: Tween<double>(begin: 0.9, end: 1.0).animate(
-              CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+              CurvedAnimation(parent: animation, curve: Curves.easeInOutBack),
             ),
             child: child,
           ),
@@ -195,20 +195,97 @@ class _ReaderPageState extends State<ReaderPage> {
               ),
             ),
           ),
+          // 底部导航按钮
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(LucideIcons.chevronLeft, size: 18),
+                      label: Text(l10n.previousChapter),
+                      onPressed: () {
+                        provider.previousChapter();
+                        _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      icon: Text(l10n.nextChapter, style: const TextStyle(color: Colors.white)),
+                      label: const Icon(LucideIcons.chevronRight, size: 18, color: Colors.white),
+                      onPressed: () {
+                        provider.nextChapter();
+                        _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => provider.toggleChapterPlay(),
-        label: Text(provider.isAutoPlaying ? l10n.pauseListening : '听全章'),
-        icon: Icon(provider.isAutoPlaying ? LucideIcons.pause : LucideIcons.play),
-        backgroundColor: const Color(0xFF7c3aed),
+      floatingActionButton: GestureDetector(
+        onTap: () => provider.toggleChapterPlay(),
+        child: Container(
+          height: 50,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: provider.isAutoPlaying ? const [Color(0xFFCC66f1), Color(0xFFFF46e5)] : const [Color(0xFF6366f1), Color(0xFF4f46e5)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(25),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.indigo.withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                provider.isAutoPlaying ? LucideIcons.pause : LucideIcons.play,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                provider.isAutoPlaying ? l10n.pauseListening : '听全章',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _VerseWidget extends StatelessWidget {
+class _VerseWidget extends StatefulWidget {
   final String verseText;
   final int verseNumber;
   final String verseId;
@@ -222,63 +299,209 @@ class _VerseWidget extends StatelessWidget {
   });
 
   @override
+  State<_VerseWidget> createState() => _VerseWidgetState();
+}
+
+class _VerseWidgetState extends State<_VerseWidget> {
+  bool _showEditor = false;
+  late TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  Color _getHighlightColor(String? colorName) {
+    switch (colorName) {
+      case 'yellow': return Colors.yellow.shade100;
+      case 'green': return Colors.green.shade100;
+      case 'blue': return Colors.blue.shade100;
+      case 'red': return Colors.red.shade100;
+      default: return Colors.transparent;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
-    final isBeingRead = provider.isSpeaking && provider.currentSpeakingId == verseId;
-    final isBookmarked = provider.isBookmarked(verseId);
+    final isBeingRead = provider.isSpeaking && provider.currentSpeakingId == widget.verseId;
+    final isBookmarked = provider.isBookmarked(widget.verseId);
+    final currentNote = provider.getNote(widget.verseId);
+    final hasNote = currentNote != null && currentNote.isNotEmpty;
+    final highlightColorName = provider.getHighlight(widget.verseId);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 24,
-                child: Text(
-                  '$verseNumber',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+    if (_showEditor) {
+      _noteController.text = currentNote ?? '';
+    }
+
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: () => setState(() => _showEditor = !_showEditor),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      child: Text(
+                        '${widget.verseNumber}',
+                        style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: (highlightColorName != null || hasNote) ? _getHighlightColor(highlightColorName ?? 'yellow') : Colors.transparent,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              fontSize: 18,
+                              height: 1.6,
+                              color: isBeingRead ? Theme.of(context).primaryColor : Theme.of(context).textTheme.bodyLarge?.color,
+                              fontWeight: isBeingRead ? FontWeight.bold : FontWeight.w500,
+                            ),
+                            children: [
+                              TextSpan(text: widget.verseText),
+                              if (hasNote)
+                                const WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(left: 6.0),
+                                    child: Icon(LucideIcons.fileImage, size: 16, color: Color(0xFF10b981)),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Expanded(
-                child: Text(
-                  verseText,
-                  style: TextStyle(
-                    fontSize: 18,
-                    height: 1.6,
-                    color: isBeingRead ? Theme.of(context).primaryColor : null,
-                    fontWeight: isBeingRead ? FontWeight.bold : FontWeight.w500,
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const SizedBox(width: 24),
+                    _VerseActionIcon(
+                      icon: LucideIcons.volume2,
+                      isActive: isBeingRead,
+                      onTap: () => isBeingRead ? provider.stop() : provider.speak(widget.verseText, widget.verseId),
+                    ),
+                    const SizedBox(width: 20),
+                    _VerseActionIcon(
+                      icon: LucideIcons.bookmark,
+                      isActive: isBookmarked,
+                      activeColor: Colors.amber,
+                      onTap: () => provider.toggleBookmark(widget.verseId),
+                    ),
+                    const SizedBox(width: 20),
+                    _VerseActionIcon(
+                      icon: LucideIcons.share2,
+                      onTap: () => provider.shareVerse(provider.selectedBook!.id, provider.selectedChapterIndex, widget.verseNumber - 1),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: _showEditor ? Container(
+            margin: const EdgeInsets.only(top: 8, bottom: 20),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.grey.shade100),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 15, offset: const Offset(0, 8)),
+              ],
+            ),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        _HighlightDot(color: const Color(0xFFfef08a), isSelected: highlightColorName == 'yellow', onTap: () => provider.setHighlight(widget.verseId, highlightColorName == 'yellow' ? null : 'yellow')),
+                        const SizedBox(width: 12),
+                        _HighlightDot(color: const Color(0xFFbbf7d0), isSelected: highlightColorName == 'green', onTap: () => provider.setHighlight(widget.verseId, highlightColorName == 'green' ? null : 'green')),
+                        const SizedBox(width: 12),
+                        _HighlightDot(color: const Color(0xFFbfdbfe), isSelected: highlightColorName == 'blue', onTap: () => provider.setHighlight(widget.verseId, highlightColorName == 'blue' ? null : 'blue')),
+                        const SizedBox(width: 12),
+                        _HighlightDot(color: const Color(0xFFfecaca), isSelected: highlightColorName == 'red', onTap: () => provider.setHighlight(widget.verseId, highlightColorName == 'red' ? null : 'red')),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(LucideIcons.x, size: 18, color: Colors.grey),
+                      onPressed: () => setState(() => _showEditor = false),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8F9FA),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade100),
+                  ),
+                  child: TextField(
+                    controller: _noteController,
+                    maxLines: 5,
+                    autofocus: true,
+                    decoration: const InputDecoration(
+                      hintText: '写下你的灵修感悟...',
+                      contentPadding: EdgeInsets.all(16),
+                      border: InputBorder.none,
+                    ),
+                    style: const TextStyle(fontSize: 15, height: 1.5),
+                    onChanged: (text) => provider.saveNote(widget.verseId, text),
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const SizedBox(width: 24),
-              _VerseActionIcon(
-                icon: LucideIcons.volume2,
-                isActive: isBeingRead,
-                onTap: () => isBeingRead ? provider.stop() : provider.speak(verseText, verseId),
-              ),
-              const SizedBox(width: 20),
-              _VerseActionIcon(
-                icon: LucideIcons.bookmark,
-                isActive: isBookmarked,
-                activeColor: Colors.amber,
-                onTap: () => provider.toggleBookmark(verseId),
-              ),
-              const SizedBox(width: 20),
-              _VerseActionIcon(
-                icon: LucideIcons.share2,
-                onTap: () => provider.shareVerse(provider.selectedBook!.id, provider.selectedChapterIndex, verseNumber - 1),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ) : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
+}
+
+class _HighlightDot extends StatelessWidget {
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+  const _HighlightDot({required this.color, required this.isSelected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        width: 32, height: 32,
+        decoration: BoxDecoration(
+          color: color, shape: BoxShape.circle,
+          border: isSelected ? Border.all(color: Colors.black.withOpacity(0.1), width: 1) : null,
+        ),
+        child: isSelected ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
       ),
     );
   }
@@ -320,6 +543,7 @@ class _DailyVerseCard extends StatelessWidget {
     final provider = Provider.of<AppProvider>(context);
     final bookName = provider.getLocalizedBookName(context, verse.bookId);
     return Container(
+      margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -512,11 +736,13 @@ class _NavigationDrawer extends StatefulWidget {
   State<_NavigationDrawer> createState() => _NavigationDrawerState();
 }
 
-class _NavigationDrawerState extends State<_NavigationDrawer> {
+class _NavigationDrawerState extends State<_NavigationDrawer> with SingleTickerProviderStateMixin {
   late int _tempBookIdx;
   late int _tempChapIdx;
   final ScrollController _bookScrollController = ScrollController();
   final ScrollController _chapterScrollController = ScrollController();
+  late AnimationController _animController;
+  late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
@@ -524,6 +750,12 @@ class _NavigationDrawerState extends State<_NavigationDrawer> {
     final provider = Provider.of<AppProvider>(context, listen: false);
     _tempBookIdx = provider.selectedBookIndex;
     _tempChapIdx = provider.selectedChapterIndex;
+
+    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 400));
+    _slideAnimation = Tween<Offset>(begin: const Offset(-1, 0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOutCubic));
+    
+    _animController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollToCurrentSelection();
@@ -533,12 +765,12 @@ class _NavigationDrawerState extends State<_NavigationDrawer> {
   void _scrollToCurrentSelection() {
     if (_bookScrollController.hasClients) {
       double bookOffset = max(0, (_tempBookIdx * 52.0) - 100);
-      _bookScrollController.animateTo(bookOffset, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      _bookScrollController.jumpTo(bookOffset);
     }
     if (_chapterScrollController.hasClients) {
       int row = _tempChapIdx ~/ 3;
       double chapOffset = max(0, (row * 60.0) - 100);
-      _chapterScrollController.animateTo(chapOffset, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      _chapterScrollController.jumpTo(chapOffset);
     }
   }
 
@@ -546,6 +778,7 @@ class _NavigationDrawerState extends State<_NavigationDrawer> {
   void dispose() {
     _bookScrollController.dispose();
     _chapterScrollController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
@@ -555,64 +788,104 @@ class _NavigationDrawerState extends State<_NavigationDrawer> {
     final books = provider.bibleData;
     final chapters = books.isNotEmpty ? books[_tempBookIdx].chapters : [];
 
-    return Drawer(
-      width: 420,
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10, left: 20, right: 10, bottom: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '章节导航',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(LucideIcons.x),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
+    return SlideTransition(
+      position: _slideAnimation,
+      child: Drawer(
+        width: 420,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10, left: 20, right: 10, bottom: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '章节导航',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(LucideIcons.x),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Container(
-                    color: const Color(0xFFF8F9FA),
-                    child: ListView.builder(
-                      controller: _bookScrollController,
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: books.length,
+            const Divider(height: 1),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Container(
+                      color: const Color(0xFFF8F9FA),
+                      child: ListView.builder(
+                        controller: _bookScrollController,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        itemCount: books.length,
+                        itemBuilder: (context, index) {
+                          final isSel = index == _tempBookIdx;
+                          return InkWell(
+                            onTap: () {
+                              setState(() {
+                                _tempBookIdx = index;
+                                _tempChapIdx = 0;
+                              });
+                              if (_chapterScrollController.hasClients) {
+                                _chapterScrollController.jumpTo(0);
+                              }
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isSel ? Colors.indigo : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                provider.getLocalizedBookName(context, books[index].id),
+                                style: TextStyle(
+                                  color: isSel ? Colors.white : Colors.black87,
+                                  fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: GridView.builder(
+                      controller: _chapterScrollController,
+                      padding: const EdgeInsets.all(16),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 3,
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                      ),
+                      itemCount: chapters.length,
                       itemBuilder: (context, index) {
-                        final isSel = index == _tempBookIdx;
+                        final isCurrentChap = index == _tempChapIdx;
                         return InkWell(
                           onTap: () {
-                            setState(() {
-                              _tempBookIdx = index;
-                              _tempChapIdx = 0; // 切换书名默认选择第一个章节
-                            });
-                            if (_chapterScrollController.hasClients) {
-                              _chapterScrollController.jumpTo(0);
-                            }
-                            provider.navigateTo(_tempBookIdx, 0);
+                            provider.navigateTo(_tempBookIdx, index);
+                            Navigator.pop(context);
                           },
                           child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             decoration: BoxDecoration(
-                              color: isSel ? Colors.indigo : Colors.transparent,
+                              color: isCurrentChap ? Colors.indigo : Colors.white,
                               borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: isCurrentChap ? Colors.indigo : Colors.grey.shade300),
                             ),
-                            child: Text(
-                              provider.getLocalizedBookName(context, books[index].id),
-                              style: TextStyle(
-                                color: isSel ? Colors.white : Colors.black87,
-                                fontWeight: isSel ? FontWeight.bold : FontWeight.normal,
-                                fontSize: 14,
+                            child: Center(
+                              child: Text(
+                                '${index + 1}',
+                                style: TextStyle(
+                                  color: isCurrentChap ? Colors.white : Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -620,49 +893,11 @@ class _NavigationDrawerState extends State<_NavigationDrawer> {
                       },
                     ),
                   ),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: GridView.builder(
-                    controller: _chapterScrollController,
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                    ),
-                    itemCount: chapters.length,
-                    itemBuilder: (context, index) {
-                      final isCurrentChap = index == _tempChapIdx;
-                      return InkWell(
-                        onTap: () {
-                          provider.navigateTo(_tempBookIdx, index);
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isCurrentChap ? Colors.indigo : Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: isCurrentChap ? Colors.indigo : Colors.grey.shade300),
-                          ),
-                          child: Center(
-                            child: Text(
-                              '${index + 1}',
-                              style: TextStyle(
-                                color: isCurrentChap ? Colors.white : Colors.black87,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
