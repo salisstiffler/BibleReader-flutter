@@ -38,6 +38,11 @@ dependencies:
   lucide_flutter: ^0.563.0
   flutter_tts: ^4.2.5
   shared_preferences: ^2.5.4
+  share_plus: ^9.0.0
+  url_strategy: ^0.2.0
+  intl: ^0.20.2 # Add for localization
+  flutter_localizations: # Add for localization
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +60,7 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true # Enable Flutter's localization generation
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

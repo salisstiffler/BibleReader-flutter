@@ -3,7 +3,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
+import '../l10n/app_localizations.dart';
 import '../models/bible_data.dart';
+import '../models/bible_verse.dart'; // Import BibleVerse
 import '../services/bible_service.dart';
 
 // Helper for Theme Colors
@@ -112,50 +115,6 @@ enum AppTheme {
   }
 }
 
-class BibleVerse {
-  final String bookName;
-  final int bookIndex;
-  final int chapterIndex;
-  final int verseIndex;
-  final String text;
-
-  BibleVerse({
-    required this.bookName,
-    required this.bookIndex,
-    required this.chapterIndex,
-    required this.verseIndex,
-    required this.text,
-  });
-
-  String get id => '$bookName-${chapterIndex + 1}:${verseIndex + 1}';
-
-  factory BibleVerse.fromId(String id, List<BibleBook> bibleData) {
-    final parts = id.split('-');
-    final bookName = parts[0];
-    final chapterVerse = parts[1].split(':');
-    final chapterNum = int.parse(chapterVerse[0]);
-    final verseNum = int.parse(chapterVerse[1]);
-
-    final bookIdx = bibleData.indexWhere((book) => book.name == bookName);
-    if (bookIdx == -1) {
-      throw Exception("Book not found for ID: $id");
-    }
-    final book = bibleData[bookIdx];
-    
-    if (chapterNum <= 0 || chapterNum > book.chapters.length || verseNum <= 0 || verseNum > book.chapters[chapterNum - 1].length) {
-      throw Exception("Chapter or verse out of bounds for ID: $id");
-    }
-
-    return BibleVerse(
-      bookName: bookName,
-      bookIndex: bookIdx,
-      chapterIndex: chapterNum - 1,
-      verseIndex: verseNum - 1,
-      text: book.chapters[chapterNum - 1][verseNum - 1],
-    );
-  }
-}
-
 class AppProvider with ChangeNotifier {
   final BibleService _bibleService = BibleService();
   final FlutterTts _flutterTts = FlutterTts();
@@ -163,7 +122,8 @@ class AppProvider with ChangeNotifier {
 
   // Data state
   bool _isLoading = true;
-  String _currentLanguage = 'en';
+  String _currentLanguageCode = 'zh'; // Store language code for persistence
+  Locale? _appLocale;
   List<BibleBook> _bibleData = [];
   int _selectedBookIndex = 0;
   int _selectedChapterIndex = 0;
@@ -172,7 +132,7 @@ class AppProvider with ChangeNotifier {
   // TTS State
   bool _isSpeaking = false;
   bool _isAutoPlaying = false;
-  String? _currentSpeakingId; // Format: "BookName-Chapter:Verse"
+  String? _currentSpeakingId; // Format: "BookId-Chapter:Verse"
 
   // Bookmarks State
   final Set<String> _bookmarks = {}; // Stores verse IDs
@@ -195,7 +155,8 @@ class AppProvider with ChangeNotifier {
 
   // Public getters
   bool get isLoading => _isLoading;
-  String get currentLanguage => _currentLanguage;
+  String get currentLanguage => _currentLanguageCode;
+  Locale? get appLocale => _appLocale;
   List<BibleBook> get bibleData => _bibleData;
   int get selectedBookIndex => _selectedBookIndex;
   int get selectedChapterIndex => _selectedChapterIndex;
@@ -223,7 +184,52 @@ class AppProvider with ChangeNotifier {
   AppProvider() {
     _initPrefs();
     _initTts();
-    loadBible(_currentLanguage);
+    // loadBible will be called after _initPrefs, which loads the language.
+    // Deep link handling might happen after initial load.
+  }
+
+  Future<void> initializeApp(Uri? initialUri) async {
+    await _initPrefs(); // Load preferences including language
+    _initTts();
+    await loadBible(_currentLanguageCode); // Load bible data and set locale
+
+    if (initialUri != null) {
+      _handleDeepLink(initialUri);
+    }
+
+    _generateDailyVerse(); // Generate daily verse after data is loaded and potential deep link navigated
+    notifyListeners(); // Notify after all initial setup is done
+  }
+
+  // --- Deep Linking ---
+  void _handleDeepLink(Uri uri) {
+    print('Handling deep link: $uri');
+    // For local testing, uri.host will be localhost, so we remove the host check.
+    // In production, you might want to enforce a specific host.
+    if (uri.pathSegments.isNotEmpty && uri.pathSegments[0] == 'read') {
+      final params = uri.queryParameters;
+      final bookId = params['book']; // Changed from bookName to bookId
+      final chapter = int.tryParse(params['chapter'] ?? '');
+      final verse = int.tryParse(params['verse'] ?? '');
+
+      print('Parsed deep link - Book: $bookId, Chapter: $chapter, Verse: $verse');
+
+      if (bookId != null && chapter != null && verse != null) {
+        final bookIndex = _bibleData.indexWhere((book) => book.id == bookId); // Search by book.id
+        print('Book index for $bookId: $bookIndex');
+        if (bookIndex != -1) {
+          // Adjust to 0-based index
+          navigateTo(bookIndex, chapter - 1);
+          // TODO: Add logic to highlight/scroll to specific verse if needed in ReaderPage
+          currentTabIndex = 0; // Switch to reader tab
+          print('Navigated to $bookId chapter ${chapter}');
+        } else {
+          print('Book not found for deep link: $bookId');
+        }
+      } else {
+        print('Invalid deep link parameters.');
+      }
+    }
   }
 
   // --- Persistence ---
@@ -279,7 +285,8 @@ class AppProvider with ChangeNotifier {
     _pauseOnManualSwitch = _prefs.getBool('pauseOnManualSwitch') ?? true;
     _continuousReading = _prefs.getBool('continuousReading') ?? false;
     _playbackRate = _prefs.getDouble('playbackRate') ?? 1.0;
-    _currentLanguage = _prefs.getString('currentLanguage') ?? 'en'; // Load last used language
+    _currentLanguageCode = _prefs.getString('currentLanguageCode') ?? 'zh'; // Load last used language, default to 'zh'
+    _appLocale = _getLocaleFromCode(_currentLanguageCode); // Initialize appLocale from stored code
     final themeId = _prefs.getString('theme') ?? AppTheme.light.id;
     _theme = AppTheme.values.firstWhere((e) => e.id == themeId, orElse: () => AppTheme.light);
     _fontSize = _prefs.getDouble('fontSize') ?? 18.0;
@@ -290,7 +297,7 @@ class AppProvider with ChangeNotifier {
     await _prefs.setBool('pauseOnManualSwitch', _pauseOnManualSwitch);
     await _prefs.setBool('continuousReading', _continuousReading);
     await _prefs.setDouble('playbackRate', _playbackRate);
-    await _prefs.setString('currentLanguage', _currentLanguage);
+    await _prefs.setString('currentLanguageCode', _currentLanguageCode); // Save current language code
     await _prefs.setString('theme', _theme.id);
     await _prefs.setDouble('fontSize', _fontSize);
   }
@@ -351,7 +358,7 @@ class AppProvider with ChangeNotifier {
   void _playChapterFromStart() {
     final verses = selectedChapter;
     if (verses != null && verses.isNotEmpty) {
-      final verseId = BibleVerse(bookName: selectedBook!.name, bookIndex: selectedBookIndex, chapterIndex: selectedChapterIndex, verseIndex: 0, text: verses[0]).id;
+      final verseId = BibleVerse(bookId: selectedBook!.id, bookIndex: selectedBookIndex, chapterIndex: selectedChapterIndex, verseIndex: 0, text: verses[0]).id;
       speak(verses[0], verseId);
     } else {
       _isAutoPlaying = false; // Cannot autoplay empty chapter
@@ -374,7 +381,7 @@ class AppProvider with ChangeNotifier {
     // Check if there are more verses in the current chapter
     if (currentVerseNumber < selectedChapter!.length) {
       final nextVerseText = selectedChapter![currentVerseNumber];
-      final nextVerseId = BibleVerse(bookName: selectedBook!.name, bookIndex: selectedBookIndex, chapterIndex: selectedChapterIndex, verseIndex: currentVerseNumber, text: nextVerseText).id;
+      final nextVerseId = BibleVerse(bookId: selectedBook!.id, bookIndex: selectedBookIndex, chapterIndex: selectedChapterIndex, verseIndex: currentVerseNumber, text: nextVerseText).id;
       speak(nextVerseText, nextVerseId);
     } else {
       // Reached end of current chapter, try to move to next
@@ -385,7 +392,7 @@ class AppProvider with ChangeNotifier {
         _selectedChapterIndex++;
         // notifyListeners(); // Don't notify yet, speak will notify
         final nextChapFirstVerseText = selectedBook!.chapters[_selectedChapterIndex][0];
-        final nextChapFirstVerseId = BibleVerse(bookName: selectedBook!.name, bookIndex: selectedBookIndex, chapterIndex: _selectedChapterIndex, verseIndex: 0, text: nextChapFirstVerseText).id;
+        final nextChapFirstVerseId = BibleVerse(bookId: selectedBook!.id, bookIndex: selectedBookIndex, chapterIndex: _selectedChapterIndex, verseIndex: 0, text: nextChapFirstVerseText).id;
         speak(nextChapFirstVerseText, nextChapFirstVerseId);
       } else if (currentBookNum < _bibleData.length - 1) {
         _selectedBookIndex++;
@@ -393,7 +400,7 @@ class AppProvider with ChangeNotifier {
         // notifyListeners(); // Don't notify yet, speak will notify
         final nextBook = _bibleData[_selectedBookIndex];
         final nextBookFirstVerseText = nextBook.chapters[0][0];
-        final nextBookFirstVerseId = BibleVerse(bookName: nextBook.name, bookIndex: _selectedBookIndex, chapterIndex: 0, verseIndex: 0, text: nextBookFirstVerseText).id;
+        final nextBookFirstVerseId = BibleVerse(bookId: nextBook.id, bookIndex: _selectedBookIndex, chapterIndex: 0, verseIndex: 0, text: nextBookFirstVerseText).id;
         speak(nextBookFirstVerseText, nextBookFirstVerseId);
       } else {
         // End of the Bible
@@ -413,7 +420,7 @@ class AppProvider with ChangeNotifier {
         if (chapter.isNotEmpty) {
           final verseIndex = Random().nextInt(chapter.length);
           _dailyVerse = BibleVerse(
-            bookName: book.name,
+            bookId: book.id,
             bookIndex: bookIndex,
             chapterIndex: chapterIndex,
             verseIndex: verseIndex,
@@ -424,31 +431,46 @@ class AppProvider with ChangeNotifier {
     }
   }
 
+  Locale _getLocaleFromCode(String code) {
+    if (code == 'zh-hant') {
+      return const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant');
+    } else if (code == 'zh') {
+      return const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans');
+    } else {
+      return Locale(code);
+    }
+  }
+
   Future<void> loadBible(String languageCode) async {
     _isLoading = true;
+    print('AppProvider: Loading Bible for language code: $languageCode');
     notifyListeners();
+
     await stop(); // Stop any playback
 
     try {
-      final data = await _bibleService.loadBible(languageCode);
+      final data = await _bibleService.loadBible(languageCode); // Pass languageCode
       _bibleData = data;
-      _currentLanguage = languageCode; // Update language after successful load
+      _currentLanguageCode = languageCode; // Update language code after successful load
+      _appLocale = _getLocaleFromCode(languageCode); // Update appLocale properly
       _selectedBookIndex = 0;
       _selectedChapterIndex = 0;
       _generateDailyVerse();
+      print('AppProvider: Bible data loaded successfully for $languageCode. First book: ${_bibleData.first.name}');
     } catch (e) {
-      print('Error loading Bible data: $e');
+      print('AppProvider: Error loading Bible data: $e');
       _bibleData = [];
     } finally {
       _isLoading = false;
       _saveSettings(); // Save language preference
-      notifyListeners();
+      notifyListeners(); // Notify again after data is fully loaded
+      print('AppProvider: notifyListeners called after loadBible completion.');
     }
   }
 
-  void changeLanguage(String newLanguage) {
-    if (newLanguage != _currentLanguage) {
-      loadBible(newLanguage);
+  void changeLanguage(String newLanguageCode) {
+    if (newLanguageCode != _currentLanguageCode) {
+      loadBible(newLanguageCode); // Pass internal code
     }
   }
 
@@ -590,5 +612,85 @@ class AppProvider with ChangeNotifier {
   void goToReaderPage(int bookIndex, int chapterIndex) {
     navigateTo(bookIndex, chapterIndex); // Navigate to the verse
     currentTabIndex = 0; // Switch to the Reader tab
+  }
+
+  // Helper to get localized book name
+  String getLocalizedBookName(BuildContext context, String bookId) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (bookId) {
+      case 'gn': return l10n.bookGn;
+      case 'ex': return l10n.bookEx;
+      case 'lv': return l10n.bookLv;
+      case 'nm': return l10n.bookNm;
+      case 'dt': return l10n.bookDt;
+      case 'js': return l10n.bookJs;
+      case 'jud': return l10n.bookJud;
+      case 'rt': return l10n.bookRt;
+      case '1sm': return l10n.book1Sm;
+      case '2sm': return l10n.book2Sm;
+      case '1kgs': return l10n.book1kgs;
+      case '2kgs': return l10n.book2kgs;
+      case '1ch': return l10n.book1Ch;
+      case '2ch': return l10n.book2Ch;
+      case 'ezr': return l10n.bookEzr;
+      case 'ne': return l10n.bookNe;
+      case 'et': return l10n.bookEt;
+      case 'job': return l10n.bookJob;
+      case 'ps': return l10n.bookPs;
+      case 'prv': return l10n.bookPrv;
+      case 'ec': return l10n.bookEc;
+      case 'so': return l10n.bookSo;
+      case 'is': return l10n.bookIs;
+      case 'jr': return l10n.bookJr;
+      case 'lm': return l10n.bookLm;
+      case 'ez': return l10n.bookEz;
+      case 'dn': return l10n.bookDn;
+      case 'ho': return l10n.bookHo;
+      case 'jl': return l10n.bookJl;
+      case 'am': return l10n.bookAm;
+      case 'ob': return l10n.bookOb;
+      case 'jn': return l10n.bookJn;
+      case 'mi': return l10n.bookMi;
+      case 'na': return l10n.bookNa;
+      case 'hk': return l10n.bookHk;
+      case 'zp': return l10n.bookZp;
+      case 'hg': return l10n.bookHg;
+      case 'zc': return l10n.bookZc;
+      case 'ml': return l10n.bookMl;
+      case 'mt': return l10n.bookMt;
+      case 'mk': return l10n.bookMk;
+      case 'lk': return l10n.bookLk;
+      case 'jo': return l10n.bookJo;
+      case 'act': return l10n.bookAct;
+      case 'rm': return l10n.bookRm;
+      case '1co': return l10n.book1Co;
+      case '2co': return l10n.book2Co;
+      case 'gl': return l10n.bookGl;
+      case 'eph': return l10n.bookEph;
+      case 'ph': return l10n.bookPh;
+      case 'cl': return l10n.bookCl;
+      case '1ts': return l10n.book1ts;
+      case '2ts': return l10n.book2ts;
+      case '1tm': return l10n.book1tm;
+      case '2tm': return l10n.book2tm;
+      case 'tt': return l10n.bookTt;
+      case 'phm': return l10n.bookPhm;
+      case 'hb': return l10n.bookHb;
+      case 'jm': return l10n.bookJm;
+      case '1pe': return l10n.book1Pe;
+      case '2pe': return l10n.book2Pe;
+      case '1jo': return l10n.book1Jn;
+      case '2jo': return l10n.book2Jn;
+      case '3jo': return l10n.book3Jn;
+      case 'jd': return l10n.bookJd;
+      case 're': return l10n.bookRe;
+      default: return bookId;
+    }
+  }
+
+  Future<void> shareVerse(String bookId, int chapterIndex, int verseIndex) async {
+    final String verseUrl =
+        'https://yourbibleapp.com/read?book=$bookId&chapter=${chapterIndex + 1}&verse=${verseIndex + 1}';
+    await Share.share(verseUrl);
   }
 }

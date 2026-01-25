@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
+import '../models/bible_verse.dart'; // Import BibleVerse
 import '../providers/app_provider.dart';
+
 
 class BookmarksPage extends StatelessWidget {
   const BookmarksPage({super.key});
@@ -10,10 +13,12 @@ class BookmarksPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
+        final l10n = AppLocalizations.of(context)!; // Get AppLocalizations instance
+
         // Ensure bibleData is loaded before trying to resolve bookmark IDs
         if (provider.isLoading || provider.bibleData.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Bookmarks')),
+            appBar: AppBar(title: Text(l10n.bookmarksTab)), // Localized
             body: const Center(child: CircularProgressIndicator()),
           );
         }
@@ -22,11 +27,11 @@ class BookmarksPage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Bookmarks'),
+            title: Text(l10n.bookmarksTab), // Localized
           ),
           body: bookmarkedVerseIds.isEmpty
-              ? const Center(
-                  child: Text('No bookmarks yet. Bookmark verses from the Reader page.'),
+              ? Center(
+                  child: Text(l10n.noBookmarksYet), // Localized
                 )
               : ListView.builder(
                   itemCount: bookmarkedVerseIds.length,
@@ -36,16 +41,17 @@ class BookmarksPage extends StatelessWidget {
                     try {
                       verse = BibleVerse.fromId(verseId, provider.bibleData);
                     } catch (e) {
-                      print('Error parsing bookmarked verse ID: $e');
+                      print('Error parsing bookmarked verse ID: $e'); // Keep print for debugging
                       // If verse ID is invalid, display a placeholder or skip
                       return const SizedBox.shrink();
                     }
 
+                    final localizedBookName = provider.getLocalizedBookName(context, verse.bookId);
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
                         title: Text(
-                          '${verse.bookName} ${verse.chapterIndex + 1}:${verse.verseIndex + 1}',
+                          '$localizedBookName ${verse.chapterIndex + 1}:${verse.verseIndex + 1}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(

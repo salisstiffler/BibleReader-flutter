@@ -1,10 +1,55 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
+import '../models/bible_verse.dart'; // Import BibleVerse
 import '../providers/app_provider.dart';
 
-class ReaderPage extends StatelessWidget {
+class ReaderPage extends StatefulWidget {
   const ReaderPage({super.key});
+
+  @override
+  State<ReaderPage> createState() => _ReaderPageState();
+}
+
+class _ReaderPageState extends State<ReaderPage> {
+  final ScrollController _scrollController = ScrollController();
+  late int _previousBookIndex;
+  late int _previousChapterIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    _previousBookIndex = provider.selectedBookIndex;
+    _previousChapterIndex = provider.selectedChapterIndex;
+  }
+
+  @override
+  void didUpdateWidget(covariant ReaderPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    if (_previousBookIndex != provider.selectedBookIndex ||
+        _previousChapterIndex != provider.selectedChapterIndex) {
+      print('ReaderPage: didUpdateWidget - Book or Chapter changed. Old: $_previousBookIndex:$_previousChapterIndex, New: ${provider.selectedBookIndex}:${provider.selectedChapterIndex}');
+      if (_scrollController.hasClients) {
+        print('ReaderPage: ScrollController has clients. Attempting to jumpTo(0).');
+        _scrollController.jumpTo(0);
+      } else {
+        print('ReaderPage: ScrollController has no clients yet.');
+      }
+      _previousBookIndex = provider.selectedBookIndex;
+      _previousChapterIndex = provider.selectedChapterIndex;
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   void _showChapterSelector(BuildContext context) {
     final provider = Provider.of<AppProvider>(context, listen: false);
@@ -15,7 +60,7 @@ class ReaderPage extends StatelessWidget {
       builder: (context) {
         return ChangeNotifierProvider.value(
           value: provider,
-          child: const _ChapterSelectorView(),
+          child: _ChapterSelectorView(l10n: AppLocalizations.of(context)!),
         );
       },
     );
@@ -24,6 +69,7 @@ class ReaderPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<AppProvider>(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (provider.isLoading) {
       return const Scaffold(
@@ -32,8 +78,9 @@ class ReaderPage extends StatelessWidget {
     }
 
     return Scaffold(
-      drawer: const _NavigationDrawer(),
+      drawer: _NavigationDrawer(l10n: l10n),
       body: CustomScrollView(
+        controller: _scrollController, // Attach controller here
         slivers: [
           SliverAppBar(
             pinned: true,
@@ -63,9 +110,9 @@ class ReaderPage extends StatelessWidget {
                   child: const Icon(LucideIcons.bookOpen, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 12),
-                const Text(
-                  'Holy Read',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                Text(
+                  l10n.appTitle, // Localized app title
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -79,12 +126,13 @@ class ReaderPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (provider.dailyVerse != null)
-                        _DailyVerseCard(verse: provider.dailyVerse!),
+                        _DailyVerseCard(verse: provider.dailyVerse!, l10n: l10n),
                       const SizedBox(height: 24),
                       _ChapterSelectorButton(
-                        bookName: provider.selectedBook!.name,
+                        bookName: provider.selectedBook!.id, // Pass book ID for localization
                         chapterIndex: provider.selectedChapterIndex,
                         onTap: () => _showChapterSelector(context),
+                        l10n: l10n,
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -99,10 +147,9 @@ class ReaderPage extends StatelessWidget {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   final verseText = provider.selectedChapter![index];
-                  // Use a more descriptive verse ID for bookmarks/notes
                   final verseId = BibleVerse(
-                    bookName: provider.selectedBook!.name,
-                    bookIndex: provider.selectedBookIndex, // Added bookIndex
+                    bookId: provider.selectedBook!.id, // Use book ID
+                    bookIndex: provider.selectedBookIndex,
                     chapterIndex: provider.selectedChapterIndex,
                     verseIndex: index,
                     text: verseText,
@@ -111,6 +158,7 @@ class ReaderPage extends StatelessWidget {
                     verseText: verseText,
                     verseNumber: index + 1,
                     verseId: verseId,
+                    l10n: l10n,
                   );
                 },
                 childCount: provider.selectedChapter?.length ?? 0,
@@ -125,7 +173,7 @@ class ReaderPage extends StatelessWidget {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(LucideIcons.chevronLeft),
-                      label: const Text('Previous'),
+                      label: Text(l10n.previousChapter),
                       onPressed: provider.previousChapter,
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -136,7 +184,7 @@ class ReaderPage extends StatelessWidget {
                   const SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton.icon(
-                      icon: const Text('Next'),
+                      icon: Text(l10n.nextChapter),
                       label: const Icon(LucideIcons.chevronRight),
                       onPressed: provider.nextChapter,
                       style: ElevatedButton.styleFrom(
@@ -153,7 +201,7 @@ class ReaderPage extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => provider.toggleChapterPlay(),
-        label: Text(provider.isAutoPlaying ? 'Pause' : 'Listen Chapter'),
+        label: Text(provider.isAutoPlaying ? l10n.pauseListening : l10n.listenChapter),
         icon: Icon(provider.isAutoPlaying ? LucideIcons.pause : LucideIcons.play),
         backgroundColor: provider.isAutoPlaying ? Colors.redAccent : Theme.of(context).primaryColor,
       ),
@@ -165,11 +213,13 @@ class _VerseWidget extends StatefulWidget {
   final String verseText;
   final int verseNumber;
   final String verseId;
+  final AppLocalizations l10n;
 
   const _VerseWidget({
     required this.verseText,
     required this.verseNumber,
     required this.verseId,
+    required this.l10n,
   });
 
   @override
@@ -194,11 +244,16 @@ class _VerseWidgetState extends State<_VerseWidget> {
 
   Color _getHighlightColor(String? colorName) {
     switch (colorName) {
-      case 'yellow': return Colors.yellow.shade100;
-      case 'green': return Colors.green.shade100;
-      case 'blue': return Colors.blue.shade100;
-      case 'red': return Colors.red.shade100;
-      default: return Colors.transparent;
+      case 'yellow':
+        return Colors.yellow.shade100;
+      case 'green':
+        return Colors.green.shade100;
+      case 'blue':
+        return Colors.blue.shade100;
+      case 'red':
+        return Colors.red.shade100;
+      default:
+        return Colors.transparent;
     }
   }
 
@@ -282,7 +337,18 @@ class _VerseWidgetState extends State<_VerseWidget> {
                     provider.toggleBookmark(widget.verseId);
                   },
                 ),
-                // Add Share button later if needed
+                IconButton(
+                  icon: const Icon(LucideIcons.share2),
+                  color: Colors.grey,
+                  onPressed: () {
+                    // Pass book ID for localization
+                    provider.shareVerse(
+                      provider.selectedBook!.id, // Use book ID
+                      provider.selectedChapterIndex,
+                      widget.verseNumber - 1, // verseNumber is 1-based
+                    );
+                  },
+                ),
               ],
             ),
             if (_showNoteEditor) ...[
@@ -296,7 +362,7 @@ class _VerseWidgetState extends State<_VerseWidget> {
                       controller: _noteController,
                       maxLines: null,
                       decoration: InputDecoration(
-                        hintText: 'Write your spiritual reflection...',
+                        hintText: widget.l10n.writeYourSpiritualReflection,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -353,11 +419,16 @@ class _HighlightColorButton extends StatelessWidget {
 
   Color _getColor(String name) {
     switch (name) {
-      case 'yellow': return Colors.yellow.shade400;
-      case 'green': return Colors.green.shade400;
-      case 'blue': return Colors.blue.shade400;
-      case 'red': return Colors.red.shade400;
-      default: return Colors.grey;
+      case 'yellow':
+        return Colors.yellow.shade400;
+      case 'green':
+        return Colors.green.shade400;
+      case 'blue':
+        return Colors.blue.shade400;
+      case 'red':
+        return Colors.red.shade400;
+      default:
+        return Colors.grey;
     }
   }
 
@@ -382,7 +453,8 @@ class _HighlightColorButton extends StatelessWidget {
 
 
 class _NavigationDrawer extends StatefulWidget {
-  const _NavigationDrawer();
+  final AppLocalizations l10n;
+  const _NavigationDrawer({required this.l10n});
 
   @override
   __NavigationDrawerState createState() => __NavigationDrawerState();
@@ -395,13 +467,30 @@ class __NavigationDrawerState extends State<_NavigationDrawer> {
   void initState() {
     super.initState();
     _tempSelectedBookIndex = Provider.of<AppProvider>(context, listen: false).selectedBookIndex;
+    print('_NavigationDrawer: initState - _tempSelectedBookIndex: $_tempSelectedBookIndex');
+  }
+
+  @override
+  void didUpdateWidget(covariant _NavigationDrawer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    if (_tempSelectedBookIndex != provider.selectedBookIndex) {
+      print('_NavigationDrawer: didUpdateWidget - updating _tempSelectedBookIndex from $_tempSelectedBookIndex to ${provider.selectedBookIndex}');
+      setState(() {
+        _tempSelectedBookIndex = provider.selectedBookIndex;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AppProvider>(context, listen: false);
+    print('_NavigationDrawer: build called');
+    final provider = Provider.of<AppProvider>(context);
     final books = provider.bibleData;
-    final selectedBookChapters = books[_tempSelectedBookIndex].chapters;
+    _tempSelectedBookIndex = min(_tempSelectedBookIndex, books.length - 1);
+    // Ensure _tempSelectedBookIndex doesn't go below 0 if books become empty
+    if (books.isEmpty) _tempSelectedBookIndex = 0;
+    final selectedBookChapters = books.isNotEmpty ? books[_tempSelectedBookIndex].chapters : [];
 
     return Drawer(
       child: Column(
@@ -410,7 +499,7 @@ class __NavigationDrawerState extends State<_NavigationDrawer> {
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'Select Chapter',
+                widget.l10n.selectChapter, // Localized
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
@@ -425,8 +514,10 @@ class __NavigationDrawerState extends State<_NavigationDrawer> {
                   child: ListView.builder(
                     itemCount: books.length,
                     itemBuilder: (context, index) {
+                      final localizedBookName = provider.getLocalizedBookName(context, books[index].id);
+                      print('_NavigationDrawer: Book name for index $index: $localizedBookName');
                       return ListTile(
-                        title: Text(books[index].name, style: const TextStyle(fontSize: 14)),
+                        title: Text(localizedBookName, style: const TextStyle(fontSize: 14)),
                         selected: index == _tempSelectedBookIndex,
                         selectedTileColor: Colors.indigo.withOpacity(0.1),
                         onTap: () {
@@ -474,10 +565,13 @@ class __NavigationDrawerState extends State<_NavigationDrawer> {
 
 class _DailyVerseCard extends StatelessWidget {
   final BibleVerse verse;
-  const _DailyVerseCard({required this.verse});
+  final AppLocalizations l10n; // Pass AppLocalizations
+  const _DailyVerseCard({required this.verse, required this.l10n});
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AppProvider>(context);
+    final localizedBookName = provider.getLocalizedBookName(context, verse.bookId);
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
@@ -488,7 +582,7 @@ class _DailyVerseCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Daily Wisdom',
+              l10n.dailyWisdom, // Localized
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: Colors.indigo.shade700,
@@ -508,7 +602,7 @@ class _DailyVerseCard extends StatelessWidget {
             Align(
               alignment: Alignment.bottomRight,
               child: Text(
-                '— ${verse.bookName} ${verse.chapterIndex + 1}:${verse.verseIndex + 1}',
+                '— $localizedBookName ${verse.chapterIndex + 1}:${verse.verseIndex + 1}', // Use localized name
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.indigo.shade400,
@@ -524,18 +618,22 @@ class _DailyVerseCard extends StatelessWidget {
 }
 
 class _ChapterSelectorButton extends StatelessWidget {
-  final String bookName;
+  final String bookName; // This is actually the book ID
   final int chapterIndex;
   final VoidCallback onTap;
+  final AppLocalizations l10n;
 
   const _ChapterSelectorButton({
     required this.bookName,
     required this.chapterIndex,
     required this.onTap,
+    required this.l10n,
   });
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<AppProvider>(context);
+    final localizedBookName = provider.getLocalizedBookName(context, bookName); // Get localized name
     return Card(
       elevation: 2,
       shadowColor: Colors.indigo.withOpacity(0.1),
@@ -551,7 +649,7 @@ class _ChapterSelectorButton extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  '$bookName • Chapter ${chapterIndex + 1}',
+                  '$localizedBookName • ${l10n.selectChapter} ${chapterIndex + 1}', // Use localized name
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -568,7 +666,8 @@ class _ChapterSelectorButton extends StatelessWidget {
 }
 
 class _ChapterSelectorView extends StatefulWidget {
-  const _ChapterSelectorView();
+  final AppLocalizations l10n;
+  const _ChapterSelectorView({required this.l10n});
 
   @override
   __ChapterSelectorViewState createState() => __ChapterSelectorViewState();
@@ -581,13 +680,29 @@ class __ChapterSelectorViewState extends State<_ChapterSelectorView> {
   void initState() {
     super.initState();
     _tempSelectedBookIndex = Provider.of<AppProvider>(context, listen: false).selectedBookIndex;
+    print('_ChapterSelectorView: initState - _tempSelectedBookIndex: $_tempSelectedBookIndex');
+  }
+
+  @override
+  void didUpdateWidget(covariant _ChapterSelectorView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final provider = Provider.of<AppProvider>(context, listen: false);
+    if (_tempSelectedBookIndex != provider.selectedBookIndex) {
+      print('_ChapterSelectorView: didUpdateWidget - updating _tempSelectedBookIndex from $_tempSelectedBookIndex to ${provider.selectedBookIndex}');
+      setState(() {
+        _tempSelectedBookIndex = provider.selectedBookIndex;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<AppProvider>(context, listen: false);
+    print('_ChapterSelectorView: build called');
+    final provider = Provider.of<AppProvider>(context); // Listen by default
     final books = provider.bibleData;
-    final selectedBookChapters = books[_tempSelectedBookIndex].chapters;
+    _tempSelectedBookIndex = min(_tempSelectedBookIndex, books.length - 1);
+    if (books.isEmpty) _tempSelectedBookIndex = 0;
+    final selectedBookChapters = books.isNotEmpty ? books[_tempSelectedBookIndex].chapters : [];
 
     return DraggableScrollableSheet(
       initialChildSize: 0.8,
@@ -607,7 +722,7 @@ class __ChapterSelectorViewState extends State<_ChapterSelectorView> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Select Chapter',
+                  widget.l10n.selectChapter, // Localized
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
@@ -619,8 +734,10 @@ class __ChapterSelectorViewState extends State<_ChapterSelectorView> {
                       child: ListView.builder(
                         itemCount: books.length,
                         itemBuilder: (context, index) {
+                          final localizedBookName = provider.getLocalizedBookName(context, books[index].id);
+                          print('_ChapterSelectorView: Book name for index $index: $localizedBookName');
                           return ListTile(
-                            title: Text(books[index].name),
+                            title: Text(localizedBookName),
                             selected: index == _tempSelectedBookIndex,
                             onTap: () {
                               setState(() {
@@ -636,8 +753,8 @@ class __ChapterSelectorViewState extends State<_ChapterSelectorView> {
                       child: GridView.builder(
                         controller: scrollController,
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          childAspectRatio: 1.2,
+                          crossAxisCount: 3,
+                          childAspectRatio: 1.5,
                         ),
                         itemCount: selectedBookChapters.length,
                         itemBuilder: (context, index) {

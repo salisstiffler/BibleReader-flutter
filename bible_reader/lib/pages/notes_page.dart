@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
+import '../models/bible_verse.dart'; // Import BibleVerse
 import '../providers/app_provider.dart';
 
 class NotesPage extends StatelessWidget {
@@ -10,10 +12,12 @@ class NotesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
+        final l10n = AppLocalizations.of(context)!; // Get AppLocalizations instance
+
         // Ensure bibleData is loaded before trying to resolve note IDs
         if (provider.isLoading || provider.bibleData.isEmpty) {
           return Scaffold(
-            appBar: AppBar(title: const Text('Notes')),
+            appBar: AppBar(title: Text(l10n.notesTab)), // Localized
             body: const Center(child: CircularProgressIndicator()),
           );
         }
@@ -22,11 +26,11 @@ class NotesPage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Notes'),
+            title: Text(l10n.notesTab), // Localized
           ),
           body: notedVerseIds.isEmpty
-              ? const Center(
-                  child: Text('No notes yet. Add notes to verses from the Reader page.'),
+              ? Center(
+                  child: Text(l10n.noNotesYet), // Localized
                 )
               : ListView.builder(
                   itemCount: notedVerseIds.length,
@@ -41,11 +45,12 @@ class NotesPage extends StatelessWidget {
                       return const SizedBox.shrink();
                     }
 
+                    final localizedBookName = provider.getLocalizedBookName(context, verse.bookId);
                     return Card(
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: ListTile(
                         title: Text(
-                          '${verse.bookName} ${verse.chapterIndex + 1}:${verse.verseIndex + 1}',
+                          '$localizedBookName ${verse.chapterIndex + 1}:${verse.verseIndex + 1}',
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
