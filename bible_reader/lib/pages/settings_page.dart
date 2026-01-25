@@ -250,10 +250,11 @@ class SettingsPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isActive ? Theme.of(context).primaryColor : Theme.of(context).dividerColor,
+              color: isActive ? Theme.of(context).primaryColor : Colors.transparent,
               width: 2,
             ),
             color: isActive ? Theme.of(context).primaryColor.withOpacity(0.1) : Theme.of(context).cardColor,

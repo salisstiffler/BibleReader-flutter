@@ -129,6 +129,9 @@ class AppProvider with ChangeNotifier {
   int _selectedChapterIndex = 0;
   BibleVerse? _dailyVerse;
 
+  // Navigation state
+  int? _targetVerseIndex;
+
   // TTS State
   bool _isSpeaking = false;
   bool _isAutoPlaying = false;
@@ -161,6 +164,7 @@ class AppProvider with ChangeNotifier {
   int get selectedBookIndex => _selectedBookIndex;
   int get selectedChapterIndex => _selectedChapterIndex;
   BibleVerse? get dailyVerse => _dailyVerse;
+  int? get targetVerseIndex => _targetVerseIndex;
   bool get isSpeaking => _isSpeaking;
   bool get isAutoPlaying => _isAutoPlaying;
   String? get currentSpeakingId => _currentSpeakingId;
@@ -220,6 +224,7 @@ class AppProvider with ChangeNotifier {
         if (bookIndex != -1) {
           // Adjust to 0-based index
           navigateTo(bookIndex, chapter - 1);
+          _targetVerseIndex = verse - 1;
           // TODO: Add logic to highlight/scroll to specific verse if needed in ReaderPage
           currentTabIndex = 0; // Switch to reader tab
           print('Navigated to $bookId chapter ${chapter}');
@@ -609,9 +614,15 @@ class AppProvider with ChangeNotifier {
     }
   }
 
-  void goToReaderPage(int bookIndex, int chapterIndex) {
+  void goToReaderPage(int bookIndex, int chapterIndex, [int? verseIndex]) {
     navigateTo(bookIndex, chapterIndex); // Navigate to the verse
+    _targetVerseIndex = verseIndex;
     currentTabIndex = 0; // Switch to the Reader tab
+    notifyListeners();
+  }
+
+  void clearTargetVerse() {
+    _targetVerseIndex = null;
   }
 
   // Helper to get localized book name

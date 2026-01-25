@@ -19,6 +19,7 @@ class _ReaderPageState extends State<ReaderPage> {
   final ScrollController _scrollController = ScrollController();
   late int _previousBookIndex;
   late int _previousChapterIndex;
+  final Map<int, GlobalKey> _verseKeys = {};
 
   @override
   void initState() {
@@ -34,12 +35,27 @@ class _ReaderPageState extends State<ReaderPage> {
     final provider = Provider.of<AppProvider>(context, listen: false);
     if (_previousBookIndex != provider.selectedBookIndex ||
         _previousChapterIndex != provider.selectedChapterIndex) {
+      _verseKeys.clear(); // Clear keys when chapter changes
       if (_scrollController.hasClients) {
         _scrollController.animateTo(0, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
       _previousBookIndex = provider.selectedBookIndex;
       _previousChapterIndex = provider.selectedChapterIndex;
     }
+  }
+
+  void _scrollToVerse(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final key = _verseKeys[index];
+      if (key != null && key.currentContext != null) {
+        Scrollable.ensureVisible(
+          key.currentContext!,
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOutCubic,
+        );
+        Provider.of<AppProvider>(context, listen: false).clearTargetVerse();
+      }
+    });
   }
 
   @override
@@ -93,6 +109,11 @@ class _ReaderPageState extends State<ReaderPage> {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
+    }
+
+    // Check for target verse to scroll
+    if (provider.targetVerseIndex != null) {
+      _scrollToVerse(provider.targetVerseIndex!);
     }
 
     return Scaffold(
@@ -185,6 +206,7 @@ class _ReaderPageState extends State<ReaderPage> {
                     text: verseText,
                   ).id;
                   return _VerseWidget(
+                    key: _verseKeys.putIfAbsent(index, () => GlobalKey()),
                     verseText: verseText,
                     verseNumber: index + 1,
                     verseId: verseId,
@@ -195,7 +217,6 @@ class _ReaderPageState extends State<ReaderPage> {
               ),
             ),
           ),
-          // 底部导航按钮
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 40.0),
@@ -247,7 +268,7 @@ class _ReaderPageState extends State<ReaderPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: provider.isAutoPlaying ? const [Color(0xFFCC66f1), Color(0xFFFF46e5)] : const [Color(0xFF6366f1), Color(0xFF4f46e5)],
+              colors: provider.isAutoPlaying ? const [Color(0xFF8b5cf6), Color(0xFFd946ef)] : const [Color(0xFF6366f1), Color(0xFF4f46e5)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -292,6 +313,7 @@ class _VerseWidget extends StatefulWidget {
   final AppLocalizations l10n;
 
   const _VerseWidget({
+    super.key,
     required this.verseText,
     required this.verseNumber,
     required this.verseId,
@@ -382,7 +404,7 @@ class _VerseWidgetState extends State<_VerseWidget> {
                                   alignment: PlaceholderAlignment.middle,
                                   child: Padding(
                                     padding: EdgeInsets.only(left: 6.0),
-                                    child: Icon(LucideIcons.fileImage, size: 16, color: Color(0xFF10b981)),
+                                    child: Icon(LucideIcons.fileText, size: 16, color: Color(0xFF10b981)),
                                   ),
                                 ),
                             ],
@@ -791,7 +813,7 @@ class _NavigationDrawerState extends State<_NavigationDrawer> with SingleTickerP
     return SlideTransition(
       position: _slideAnimation,
       child: Drawer(
-        width: 420,
+        width: min(MediaQuery.of(context).size.width * 0.8, 420),
         child: Column(
           children: [
             Padding(
