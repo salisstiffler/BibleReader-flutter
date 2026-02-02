@@ -8,6 +8,7 @@ import 'l10n/app_localizations.dart';
 import 'pages/reader_page.dart';
 import 'pages/bookmarks_page.dart';
 import 'pages/notes_page.dart';
+import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
 import 'providers/app_provider.dart';
 
@@ -35,7 +36,9 @@ class MyApp extends StatelessWidget {
         print('MyApp: Current provider.appLocale: ${provider.appLocale}');
         return MaterialApp(
           onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle, // Localized title
-          theme: provider.theme.themeData,
+          theme: provider.theme.getThemeData(
+            accentColor: provider.accentColor,
+          ),
           home: const AppShell(),
           locale: provider.appLocale, // Set app locale dynamically
           localizationsDelegates: const [
@@ -68,6 +71,7 @@ class _AppShellState extends State<AppShell> {
     ReaderPage(),
     BookmarksPage(),
     NotesPage(),
+    SearchPage(),
     SettingsPage(),
   ];
 
@@ -93,19 +97,23 @@ class _AppShellState extends State<AppShell> {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: const Icon(Icons.book_online),
-                label: AppLocalizations.of(context)!.readTab,
+                label: AppLocalizations.of(context)!.navRead,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.bookmark),
-                label: AppLocalizations.of(context)!.bookmarksTab,
+                label: AppLocalizations.of(context)!.navBookmarks,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.note),
-                label: AppLocalizations.of(context)!.notesTab,
+                label: AppLocalizations.of(context)!.navNotes,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.search),
+                label: AppLocalizations.of(context)!.navSearch,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.settings),
-                label: AppLocalizations.of(context)!.settingsTab,
+                label: AppLocalizations.of(context)!.navSettings,
               ),
             ],
             currentIndex: _internalSelectedIndex,

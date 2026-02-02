@@ -1,40 +1,193 @@
 {
     "@@locale": "zh_Hans",
-    "appTitle": "圣经阅读器",
-    "readTab": "阅读",
-    "bookmarksTab": "书签",
-    "notesTab": "笔记",
-    "settingsTab": "设置",
+    "appTitle": "圣经阅读",
+    "navRead": "阅读",
+    "navBookmarks": "书签",
+    "navNotes": "笔记",
+    "navSearch": "搜索",
+    "navSettings": "我的",
     "settingsTitle": "个性化设置",
     "settingsSubtitle": "打造最适合您的灵修阅读环境",
-    "localizationSection": "语言预设",
-    "visualStyleSection": "视觉风格",
-    "lightTheme": "明亮",
-    "darkTheme": "深色",
-    "sepiaTheme": "舒耳",
-    "readingControlsSection": "阅读及朗读",
-    "typographySize": "字体缩放",
-    "speechRate": "朗读速率",
-    "continuousReading": "沉浸式连续播放",
-    "continuousReadingSubtitle": "朗读完当前经文后自动进入下一节，适合闭目灵修。",
-    "pauseOnChapterSwitch": "切换章节时暂停",
-    "pauseOnChapterSwitchSubtitle": "手动切换章节时自动暂停播放，包括点击上/下一章按钮。",
-    "selectChapter": "选择章节",
-    "previousChapter": "上一章",
-    "nextChapter": "下一章",
-    "listenChapter": "朗读本章",
-    "pauseListening": "暂停",
-    "dailyWisdom": "每日箴言",
-    "writeYourSpiritualReflection": "写下你的灵修感悟...",
-    "bookNotFound": "未找到此书",
-    "chapterOrVerseOutOfBounds": "章节或经文超出范围",
-    "ttsError": "语音朗读错误",
-    "invalidDeepLinkParameters": "无效的深层链接参数。",
-    "simplifiedChinese": "简体",
-    "traditionalChinese": "繁體",
-    "english": "English",
-    "noBookmarksYet": "尚无书签。从阅读页面添加书签。",
-    "noNotesYet": "尚无笔记。从阅读页面添加笔记。",
+    "settingsUiLanguage": "语言预设",
+    "settingsVisualStyle": "视觉风格",
+    "settingsReadingControls": "阅读及朗读",
+    "settingsFontSize": "字体大小",
+    "settingsReadingEffect": "阅读模式",
+    "settingsAnimationEffect": "翻页效果",
+    "settingsCustomBg": "自定义背景",
+    "settingsAccentColor": "主题色调",
+    "settingsSpeechRate": "朗读速率",
+    "settingsContinuousReading": "沉浸式连续播放",
+    "settingsContinuousReadingDesc": "朗读完当前经文后自动进入下一节，适合闭目灵修。",
+    "settingsPauseOnSwitch": "切换章节时暂停",
+    "settingsPauseOnSwitchDesc": "手动切换章节时自动暂停播放，包括点击上/下一章按钮。",
+    "settingsThemeLight": "明亮",
+    "settingsThemeDark": "深色",
+    "settingsThemeSepia": "护眼",
+    "settingsFontFamily": "字体样式",
+    "settingsLineHeight": "行高比例",
+    "settingsEffectsScroll": "纵向滚动",
+    "settingsEffectsHorizontal": "横向滑屏",
+    "settingsEffectsPageFlip": "全屏页码",
+    "settingsEffectsPaginated": "全屏模式",
+    "settingsAnimationsNone": "无",
+    "settingsAnimationsFade": "渐隐",
+    "settingsAnimationsSlide": "滑屏",
+    "settingsAnimationsCurl": "仿真",
+    "settingsFontsSerif": "思源宋体",
+    "settingsFontsSans": "系统默认",
+    "settingsFontsKai": "优美楷体",
+    "settingsFontsRounded": "精致圆体",
+    "readerDailyWisdom": "今日灵修经文",
+    "readerAppTitle": "圣经阅读",
+    "readerMenu": "目录",
+    "readerChapterSelect": "{book} • 第 {chapter} 章",
+    "@readerChapterSelect": {
+        "placeholders": {
+            "book": {},
+            "chapter": {}
+        }
+    },
+    "readerRangeSelect": "范围选择",
+    "readerSelectStartEnd": "选择起始和结束节",
+    "readerVerseSingle": "第 {verse} 节",
+    "@readerVerseSingle": {
+        "placeholders": {
+            "verse": {}
+        }
+    },
+    "readerVerseRange": "第 {start}-{end} 节",
+    "@readerVerseRange": {
+        "placeholders": {
+            "start": {},
+            "end": {}
+        }
+    },
+    "readerBookmark": "收藏",
+    "readerStop": "停止",
+    "readerListen": "朗读",
+    "readerPlayChapter": "播全章",
+    "readerHighlight": "高亮",
+    "readerAddNote": "添加笔记...",
+    "readerReading": "正在朗读",
+    "readerPrevChapter": "上一章",
+    "readerNextChapter": "下一章",
+    "readerFullscreenReader": "进入全屏阅读",
+    "readerExitFullscreen": "退出全屏",
+    "readerNotePlaceholder": "在这里写下您的灵修感悟...",
+    "readerShare": "分享经文",
+    "readerShareSuccess": "经文和链接已复制到剪贴板!",
+    "readerDrawerBooks": "目录",
+    "readerDrawerTitle": "目录",
+    "readerNote": "笔记",
+    "commonSave": "保存",
+    "commonCancel": "取消",
+    "commonClose": "关闭",
+    "commonExpand": "显示全文",
+    "commonCollapse": "收起",
+    "bookmarksTitle": "经文收藏",
+    "bookmarksCount": "已珍藏 {count} 条灵粮",
+    "@bookmarksCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksEmpty": "书签栏空空的，开启您的读经之旅吧",
+    "bookmarksSearchPlaceholder": "搜索收藏的经文...",
+    "bookmarksEdit": "编辑",
+    "bookmarksSelectedCount": "已选择 {count} 项",
+    "@bookmarksSelectedCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksBatchDelete": "批量删除 ({count})",
+    "@bookmarksBatchDelete": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksSelectAll": "全选",
+    "bookmarksReverseSelect": "反选",
+    "bookmarksDeleteConfirm": "确定删除选中的 {count} 条书签吗?",
+    "@bookmarksDeleteConfirm": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksCancel": "取消",
+    "bookmarksConfirm": "确定删除",
+    "notesTitle": "灵修笔记",
+    "notesCount": "已记录 {count} 段感悟",
+    "@notesCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesSearchPlaceholder": "搜索您的笔记或感悟...",
+    "notesEmpty": "笔尖未动,感悟从读经开始",
+    "notesEdit": "编辑",
+    "notesSelectedCount": "已选择 {count} 项",
+    "@notesSelectedCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesBatchDelete": "批量删除 ({count})",
+    "@notesBatchDelete": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesSelectAll": "全选",
+    "notesReverseSelect": "反选",
+    "notesDeleteConfirm": "确定删除选中的 {count} 条笔记吗?",
+    "@notesDeleteConfirm": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesCancel": "取消",
+    "notesConfirm": "确定删除",
+    "globalSearchTitle": "全局搜索",
+    "globalSearchSubtitle": "搜寻圣经中的真理与智慧",
+    "globalSearchPlaceholder": "输入关键字搜索经文内容...",
+    "globalSearchCount": "共找到 {count} 处经文",
+    "@globalSearchCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "globalSearchEmpty": "未搜索到相关经文，换个词试试吧",
+    "globalSearchSearching": "正在查考经卷...",
+    "globalSearchResultFormat": "{book} {chapter}:{verse}",
+    "@globalSearchResultFormat": {
+        "placeholders": {
+            "book": {},
+            "chapter": {},
+            "verse": {}
+        }
+    },
+    "authLoginTitle": "欢迎回来",
+    "authRegisterTitle": "创建账号",
+    "authLoginDesc": "登录以在不同设备间同步您的阅读进度和记录",
+    "authRegisterDesc": "开启云端同步，开启您的灵修之旅",
+    "authUsernamePlaceholder": "用户名",
+    "authPasswordPlaceholder": "密码",
+    "authLoginBtn": "立即登录",
+    "authRegisterBtn": "注册账号",
+    "authNoAccount": "还没有账号？",
+    "authHasAccount": "已有账号？",
+    "authSwitchRegister": "去注册",
+    "authSwitchLogin": "去登录",
+    "authLoggedIn": "账号已同步",
+    "authLogout": "退出登录",
+    "authGuestUser": "游客",
+    "authSyncActive": "云端同步已激活",
+    "authSyncPrompt": "登录以同步您的数据",
+    "simplifiedChinese": "简体中文",
+    "traditionalChinese": "繁體中文",
+    "english": "英语",
     "bookGn": "创世记",
     "bookEx": "出埃及记",
     "bookLv": "利未记",
@@ -45,8 +198,8 @@
     "bookRt": "路得记",
     "book1Sm": "撒母耳记上",
     "book2Sm": "撒母耳记下",
-    "book1Ki": "列王纪上",
-    "book2Ki": "列王纪下",
+    "book1kgs": "列王纪上",
+    "book2kgs": "列王纪下",
     "book1Ch": "历代志上",
     "book2Ch": "历代志下",
     "bookEzr": "以斯拉记",
@@ -86,10 +239,10 @@
     "bookEph": "以弗所书",
     "bookPh": "腓立比书",
     "bookCl": "歌罗西书",
-    "book1Th": "帖撒罗尼迦前书",
-    "book2Th": "帖撒罗尼迦后书",
-    "book1Ti": "提摩太前书",
-    "book2Ti": "提摩太后书",
+    "book1ts": "帖撒罗尼迦前书",
+    "book2ts": "帖撒罗尼迦后书",
+    "book1tm": "提摩太前书",
+    "book2tm": "提摩太后书",
     "bookTt": "提多书",
     "bookPhm": "腓利门书",
     "bookHb": "希伯来书",

@@ -106,29 +106,35 @@ abstract class AppLocalizations {
   /// **'Holy Read'**
   String get appTitle;
 
-  /// No description provided for @readTab.
+  /// No description provided for @navRead.
   ///
   /// In en, this message translates to:
   /// **'Read'**
-  String get readTab;
+  String get navRead;
 
-  /// No description provided for @bookmarksTab.
+  /// No description provided for @navBookmarks.
   ///
   /// In en, this message translates to:
   /// **'Bookmarks'**
-  String get bookmarksTab;
+  String get navBookmarks;
 
-  /// No description provided for @notesTab.
+  /// No description provided for @navNotes.
   ///
   /// In en, this message translates to:
   /// **'Notes'**
-  String get notesTab;
+  String get navNotes;
 
-  /// No description provided for @settingsTab.
+  /// No description provided for @navSearch.
   ///
   /// In en, this message translates to:
-  /// **'Settings'**
-  String get settingsTab;
+  /// **'Search'**
+  String get navSearch;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Mine'**
+  String get navSettings;
 
   /// No description provided for @settingsTitle.
   ///
@@ -142,154 +148,664 @@ abstract class AppLocalizations {
   /// **'Configure your perfect reading environment'**
   String get settingsSubtitle;
 
-  /// No description provided for @localizationSection.
+  /// No description provided for @settingsUiLanguage.
   ///
   /// In en, this message translates to:
   /// **'Localization'**
-  String get localizationSection;
+  String get settingsUiLanguage;
 
-  /// No description provided for @visualStyleSection.
+  /// No description provided for @settingsVisualStyle.
   ///
   /// In en, this message translates to:
   /// **'Visual Style'**
-  String get visualStyleSection;
+  String get settingsVisualStyle;
 
-  /// No description provided for @lightTheme.
+  /// No description provided for @settingsReadingControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading & Audio'**
+  String get settingsReadingControls;
+
+  /// No description provided for @settingsFontSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get settingsFontSize;
+
+  /// No description provided for @settingsReadingEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Mode'**
+  String get settingsReadingEffect;
+
+  /// No description provided for @settingsAnimationEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Animation'**
+  String get settingsAnimationEffect;
+
+  /// No description provided for @settingsCustomBg.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Background'**
+  String get settingsCustomBg;
+
+  /// No description provided for @settingsAccentColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Accent Color'**
+  String get settingsAccentColor;
+
+  /// No description provided for @settingsSpeechRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech Speed'**
+  String get settingsSpeechRate;
+
+  /// No description provided for @settingsContinuousReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuous Playback'**
+  String get settingsContinuousReading;
+
+  /// No description provided for @settingsContinuousReadingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically advance to the next verse, ideal for focused meditation.'**
+  String get settingsContinuousReadingDesc;
+
+  /// No description provided for @settingsPauseOnSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause on Module Switch'**
+  String get settingsPauseOnSwitch;
+
+  /// No description provided for @settingsPauseOnSwitchDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically pause playback when manually changing chapters.'**
+  String get settingsPauseOnSwitchDesc;
+
+  /// No description provided for @settingsThemeLight.
   ///
   /// In en, this message translates to:
   /// **'Light'**
-  String get lightTheme;
+  String get settingsThemeLight;
 
-  /// No description provided for @darkTheme.
+  /// No description provided for @settingsThemeDark.
   ///
   /// In en, this message translates to:
   /// **'Dark'**
-  String get darkTheme;
+  String get settingsThemeDark;
 
-  /// No description provided for @sepiaTheme.
+  /// No description provided for @settingsThemeSepia.
   ///
   /// In en, this message translates to:
   /// **'Sepia'**
-  String get sepiaTheme;
+  String get settingsThemeSepia;
 
-  /// No description provided for @readingControlsSection.
+  /// No description provided for @settingsFontFamily.
   ///
   /// In en, this message translates to:
-  /// **'Reading Controls'**
-  String get readingControlsSection;
+  /// **'Font Family'**
+  String get settingsFontFamily;
 
-  /// No description provided for @typographySize.
+  /// No description provided for @settingsLineHeight.
   ///
   /// In en, this message translates to:
-  /// **'Typography Size'**
-  String get typographySize;
+  /// **'Line Spacing'**
+  String get settingsLineHeight;
 
-  /// No description provided for @speechRate.
+  /// No description provided for @settingsEffectsScroll.
   ///
   /// In en, this message translates to:
-  /// **'Speech Rate'**
-  String get speechRate;
+  /// **'Vertical Scroll'**
+  String get settingsEffectsScroll;
 
-  /// No description provided for @continuousReading.
+  /// No description provided for @settingsEffectsHorizontal.
   ///
   /// In en, this message translates to:
-  /// **'Continuous Reading'**
-  String get continuousReading;
+  /// **'Horizontal Slide'**
+  String get settingsEffectsHorizontal;
 
-  /// No description provided for @continuousReadingSubtitle.
+  /// No description provided for @settingsEffectsPageFlip.
   ///
   /// In en, this message translates to:
-  /// **'Auto-play subsequent verses for hands-free study.'**
-  String get continuousReadingSubtitle;
+  /// **'Full Screen'**
+  String get settingsEffectsPageFlip;
 
-  /// No description provided for @pauseOnChapterSwitch.
+  /// No description provided for @settingsEffectsPaginated.
   ///
   /// In en, this message translates to:
-  /// **'Pause on Chapter Switch'**
-  String get pauseOnChapterSwitch;
+  /// **'Book Mode'**
+  String get settingsEffectsPaginated;
 
-  /// No description provided for @pauseOnChapterSwitchSubtitle.
+  /// No description provided for @settingsAnimationsNone.
   ///
   /// In en, this message translates to:
-  /// **'Automatically pause playback when manually switching chapters.'**
-  String get pauseOnChapterSwitchSubtitle;
+  /// **'None'**
+  String get settingsAnimationsNone;
 
-  /// No description provided for @selectChapter.
+  /// No description provided for @settingsAnimationsFade.
   ///
   /// In en, this message translates to:
-  /// **'Select Chapter'**
-  String get selectChapter;
+  /// **'Fade'**
+  String get settingsAnimationsFade;
 
-  /// No description provided for @previousChapter.
+  /// No description provided for @settingsAnimationsSlide.
   ///
   /// In en, this message translates to:
-  /// **'Previous'**
-  String get previousChapter;
+  /// **'Slide'**
+  String get settingsAnimationsSlide;
 
-  /// No description provided for @nextChapter.
+  /// No description provided for @settingsAnimationsCurl.
   ///
   /// In en, this message translates to:
-  /// **'Next'**
-  String get nextChapter;
+  /// **'Curl'**
+  String get settingsAnimationsCurl;
 
-  /// No description provided for @listenChapter.
+  /// No description provided for @settingsFontsSerif.
   ///
   /// In en, this message translates to:
-  /// **'Listen Chapter'**
-  String get listenChapter;
+  /// **'Serif (Classic)'**
+  String get settingsFontsSerif;
 
-  /// No description provided for @pauseListening.
+  /// No description provided for @settingsFontsSans.
   ///
   /// In en, this message translates to:
-  /// **'Pause'**
-  String get pauseListening;
+  /// **'Sans (Modern)'**
+  String get settingsFontsSans;
 
-  /// No description provided for @dailyWisdom.
+  /// No description provided for @settingsFontsKai.
+  ///
+  /// In en, this message translates to:
+  /// **'Kaiti (Elegant)'**
+  String get settingsFontsKai;
+
+  /// No description provided for @settingsFontsRounded.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounded (Soft)'**
+  String get settingsFontsRounded;
+
+  /// No description provided for @readerDailyWisdom.
   ///
   /// In en, this message translates to:
   /// **'Daily Wisdom'**
-  String get dailyWisdom;
+  String get readerDailyWisdom;
 
-  /// No description provided for @writeYourSpiritualReflection.
+  /// No description provided for @readerAppTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Holy Read'**
+  String get readerAppTitle;
+
+  /// No description provided for @readerMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Books'**
+  String get readerMenu;
+
+  /// No description provided for @readerChapterSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} • Ch. {chapter}'**
+  String readerChapterSelect(Object book, Object chapter);
+
+  /// No description provided for @readerRangeSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Range Select'**
+  String get readerRangeSelect;
+
+  /// No description provided for @readerSelectStartEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Select start and end verses'**
+  String get readerSelectStartEnd;
+
+  /// No description provided for @readerVerseSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verse {verse}'**
+  String readerVerseSingle(Object verse);
+
+  /// No description provided for @readerVerseRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Verses {start}-{end}'**
+  String readerVerseRange(Object start, Object end);
+
+  /// No description provided for @readerBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark'**
+  String get readerBookmark;
+
+  /// No description provided for @readerStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get readerStop;
+
+  /// No description provided for @readerListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get readerListen;
+
+  /// No description provided for @readerPlayChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Chapter'**
+  String get readerPlayChapter;
+
+  /// No description provided for @readerHighlight.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlight'**
+  String get readerHighlight;
+
+  /// No description provided for @readerAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a note...'**
+  String get readerAddNote;
+
+  /// No description provided for @readerReading.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading...'**
+  String get readerReading;
+
+  /// No description provided for @readerPrevChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get readerPrevChapter;
+
+  /// No description provided for @readerNextChapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get readerNextChapter;
+
+  /// No description provided for @readerFullscreenReader.
+  ///
+  /// In en, this message translates to:
+  /// **'Fullscreen Reader'**
+  String get readerFullscreenReader;
+
+  /// No description provided for @readerExitFullscreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit Fullscreen'**
+  String get readerExitFullscreen;
+
+  /// No description provided for @readerNotePlaceholder.
   ///
   /// In en, this message translates to:
   /// **'Write your spiritual reflection...'**
-  String get writeYourSpiritualReflection;
+  String get readerNotePlaceholder;
 
-  /// No description provided for @bookNotFound.
+  /// No description provided for @readerShare.
   ///
   /// In en, this message translates to:
-  /// **'Book not found'**
-  String get bookNotFound;
+  /// **'Share Bible Verse'**
+  String get readerShare;
 
-  /// No description provided for @chapterOrVerseOutOfBounds.
+  /// No description provided for @readerShareSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Chapter or verse out of bounds'**
-  String get chapterOrVerseOutOfBounds;
+  /// **'Verse and link copied to clipboard!'**
+  String get readerShareSuccess;
 
-  /// No description provided for @ttsError.
+  /// No description provided for @readerDrawerBooks.
   ///
   /// In en, this message translates to:
-  /// **'TTS Error'**
-  String get ttsError;
+  /// **'Books'**
+  String get readerDrawerBooks;
 
-  /// No description provided for @invalidDeepLinkParameters.
+  /// No description provided for @readerDrawerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Invalid deep link parameters.'**
-  String get invalidDeepLinkParameters;
+  /// **'Books'**
+  String get readerDrawerTitle;
+
+  /// No description provided for @readerNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get readerNote;
+
+  /// No description provided for @commonSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get commonSave;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get commonClose;
+
+  /// No description provided for @commonExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Show Full'**
+  String get commonExpand;
+
+  /// No description provided for @commonCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get commonCollapse;
+
+  /// No description provided for @bookmarksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get bookmarksTitle;
+
+  /// No description provided for @bookmarksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} saved verses'**
+  String bookmarksCount(Object count);
+
+  /// No description provided for @bookmarksEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookmarks yet.'**
+  String get bookmarksEmpty;
+
+  /// No description provided for @bookmarksSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search bookmarks...'**
+  String get bookmarksSearchPlaceholder;
+
+  /// No description provided for @bookmarksEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get bookmarksEdit;
+
+  /// No description provided for @bookmarksSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected'**
+  String bookmarksSelectedCount(Object count);
+
+  /// No description provided for @bookmarksBatchDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Selected ({count})'**
+  String bookmarksBatchDelete(Object count);
+
+  /// No description provided for @bookmarksSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get bookmarksSelectAll;
+
+  /// No description provided for @bookmarksReverseSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse Select'**
+  String get bookmarksReverseSelect;
+
+  /// No description provided for @bookmarksDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete these {count} bookmarks?'**
+  String bookmarksDeleteConfirm(Object count);
+
+  /// No description provided for @bookmarksCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get bookmarksCancel;
+
+  /// No description provided for @bookmarksConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get bookmarksConfirm;
+
+  /// No description provided for @notesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Spiritual Notes'**
+  String get notesTitle;
+
+  /// No description provided for @notesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Reflecting on {count} insights'**
+  String notesCount(Object count);
+
+  /// No description provided for @notesSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search notes...'**
+  String get notesSearchPlaceholder;
+
+  /// No description provided for @notesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes found.'**
+  String get notesEmpty;
+
+  /// No description provided for @notesEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get notesEdit;
+
+  /// No description provided for @notesSelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} Selected'**
+  String notesSelectedCount(Object count);
+
+  /// No description provided for @notesBatchDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Selected ({count})'**
+  String notesBatchDelete(Object count);
+
+  /// No description provided for @notesSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get notesSelectAll;
+
+  /// No description provided for @notesReverseSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reverse Select'**
+  String get notesReverseSelect;
+
+  /// No description provided for @notesDeleteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete these {count} notes?'**
+  String notesDeleteConfirm(Object count);
+
+  /// No description provided for @notesCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get notesCancel;
+
+  /// No description provided for @notesConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get notesConfirm;
+
+  /// No description provided for @globalSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Search'**
+  String get globalSearchTitle;
+
+  /// No description provided for @globalSearchSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for Truth and Wisdom in the Bible'**
+  String get globalSearchSubtitle;
+
+  /// No description provided for @globalSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter keywords to search verse content...'**
+  String get globalSearchPlaceholder;
+
+  /// No description provided for @globalSearchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Found {count} verses'**
+  String globalSearchCount(Object count);
+
+  /// No description provided for @globalSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No verses found. Try different keywords.'**
+  String get globalSearchEmpty;
+
+  /// No description provided for @globalSearchSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching the scriptures...'**
+  String get globalSearchSearching;
+
+  /// No description provided for @globalSearchResultFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{book} {chapter}:{verse}'**
+  String globalSearchResultFormat(Object book, Object chapter, Object verse);
+
+  /// No description provided for @authLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back'**
+  String get authLoginTitle;
+
+  /// No description provided for @authRegisterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get authRegisterTitle;
+
+  /// No description provided for @authLoginDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync your data across devices'**
+  String get authLoginDesc;
+
+  /// No description provided for @authRegisterDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your spiritual journey with cloud sync'**
+  String get authRegisterDesc;
+
+  /// No description provided for @authUsernamePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get authUsernamePlaceholder;
+
+  /// No description provided for @authPasswordPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get authPasswordPlaceholder;
+
+  /// No description provided for @authLoginBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get authLoginBtn;
+
+  /// No description provided for @authRegisterBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get authRegisterBtn;
+
+  /// No description provided for @authNoAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account?'**
+  String get authNoAccount;
+
+  /// No description provided for @authHasAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account?'**
+  String get authHasAccount;
+
+  /// No description provided for @authSwitchRegister.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get authSwitchRegister;
+
+  /// No description provided for @authSwitchLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get authSwitchLogin;
+
+  /// No description provided for @authLoggedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Account synced'**
+  String get authLoggedIn;
+
+  /// No description provided for @authLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get authLogout;
+
+  /// No description provided for @authGuestUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest User'**
+  String get authGuestUser;
+
+  /// No description provided for @authSyncActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync active'**
+  String get authSyncActive;
+
+  /// No description provided for @authSyncPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to sync your data'**
+  String get authSyncPrompt;
 
   /// No description provided for @simplifiedChinese.
   ///
   /// In en, this message translates to:
-  /// **'Simplified'**
+  /// **'Simplified Chinese'**
   String get simplifiedChinese;
 
   /// No description provided for @traditionalChinese.
   ///
   /// In en, this message translates to:
-  /// **'Traditional'**
+  /// **'Traditional Chinese'**
   String get traditionalChinese;
 
   /// No description provided for @english.
@@ -297,18 +813,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'English'**
   String get english;
-
-  /// No description provided for @noBookmarksYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No bookmarks yet. Bookmark verses from the Reader page.'**
-  String get noBookmarksYet;
-
-  /// No description provided for @noNotesYet.
-  ///
-  /// In en, this message translates to:
-  /// **'No notes yet. Add notes to verses from the Reader page.'**
-  String get noNotesYet;
 
   /// No description provided for @bookGn.
   ///
@@ -511,7 +1015,7 @@ abstract class AppLocalizations {
   /// No description provided for @bookNa.
   ///
   /// In en, this message translates to:
-  /// **'Nahum'**
+  /// **'Naum'**
   String get bookNa;
 
   /// No description provided for @bookHk.

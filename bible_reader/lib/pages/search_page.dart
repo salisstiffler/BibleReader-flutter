@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
-import '../models/bookmark.dart';
+import '../models/bible_data.dart'; // Import BibleBook
+import '../models/bible_verse.dart';
 import '../providers/app_provider.dart';
 
-class BookmarksPage extends StatefulWidget {
-  const BookmarksPage({super.key});
+class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
 
   @override
-  State<BookmarksPage> createState() => _BookmarksPageState();
+  State<SearchPage> createState() => _SearchPageState();
 }
 
-class _BookmarksPageState extends State<BookmarksPage> {
+class _SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
-  List<Bookmark> _filteredBookmarks = [];
+  List<BibleVerse> _searchResults = [];
+  bool _isSearching = false;
 
   String _getLocalizedBookName(BuildContext context, String bookId) {
     final l10n = AppLocalizations.of(context)!;
@@ -162,34 +164,92 @@ class _BookmarksPageState extends State<BookmarksPage> {
     super.dispose();
   }
 
-  void _filterBookmarks(List<Bookmark> bookmarks) {
-    final query = _searchController.text.toLowerCase();
-    if (query.isEmpty) {
+  void _performSearch(String query, List<BibleBook> bibleData) {
+    if (query.trim().isEmpty) {
       setState(() {
-        _filteredBookmarks = bookmarks;
+        _searchResults = [];
+        _isSearching = false;
       });
       return;
     }
 
     setState(() {
-      _filteredBookmarks = bookmarks.where((bookmark) {
-        final bookName = _getLocalizedBookName(context, bookmark.bookId);
-        final chapter = bookmark.chapter + 1;
-        final startVerse = bookmark.startVerse;
-        final endVerse = bookmark.endVerse;
-
-        String location;
-        if (startVerse == endVerse) {
-          location = '$bookName $chapter:$startVerse';
-        } else {
-          location = '$bookName $chapter:$startVerse-$endVerse';
-        }
-
-        // We don't have the full verse text here, so we can only search by location.
-        // If we need to search by text, we'd need to load the verse text.
-        return location.toLowerCase().contains(query);
-      }).toList();
+      _isSearching = true;
     });
+
+    // Perform search asynchronously
+    Future.delayed(const Duration(milliseconds: 100), () {
+      final results = <BibleVerse>[];
+      final queryLower = query.toLowerCase();
+
+      for (int bookIndex = 0; bookIndex < bibleData.length; bookIndex++) {
+        final book = bibleData[bookIndex];
+        final chapters = book.chapters;
+
+        for (
+          int chapterIndex = 0;
+          chapterIndex < chapters.length;
+          chapterIndex++
+        ) {
+          final chapter = chapters[chapterIndex];
+
+          for (int verseIndex = 0; verseIndex < chapter.length; verseIndex++) {
+            final verseText = chapter[verseIndex];
+
+            if (verseText.toLowerCase().contains(queryLower)) {
+              results.add(
+                BibleVerse(
+                  bookIndex: bookIndex,
+                  chapterIndex: chapterIndex,
+                  verseIndex: verseIndex,
+                  bookId: book.id,
+                  text: verseText,
+                ),
+              );
+            }
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _searchResults = results;
+          _isSearching = false;
+        });
+      }
+    });
+  }
+
+  TextSpan _highlightSearchTerm(String text, String query, BuildContext context) {
+    if (query.isEmpty) return TextSpan(text: text);
+    final queryLower = query.toLowerCase();
+    final textLower = text.toLowerCase();
+
+    final List<TextSpan> spans = [];
+    int start = 0;
+    int indexOfMatch;
+
+    while ((indexOfMatch = textLower.indexOf(queryLower, start)) != -1) {
+      if (indexOfMatch > start) {
+        spans.add(TextSpan(text: text.substring(start, indexOfMatch)));
+      }
+      spans.add(
+        TextSpan(
+          text: text.substring(indexOfMatch, indexOfMatch + query.length),
+          style: TextStyle(
+            backgroundColor: Theme.of(context).primaryColor.withOpacity(0.3),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+      start = indexOfMatch + query.length;
+    }
+
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+
+    return TextSpan(children: spans);
   }
 
   @override
@@ -205,42 +265,14 @@ class _BookmarksPageState extends State<BookmarksPage> {
           );
         }
 
-        final List<Bookmark> bookmarks = provider.bookmarks;
-        if (_filteredBookmarks.isEmpty && _searchController.text.isEmpty) {
-          _filteredBookmarks = bookmarks;
-        }
-
         return Scaffold(
           appBar: _buildAppBar(context, l10n),
           body: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(context, bookmarks.length, l10n),
+              _buildHeader(context, l10n),
               _buildSearchBar(context, provider, l10n),
-              Expanded(
-                child: _filteredBookmarks.isEmpty
-                    ? _buildEmptyState(
-                        context,
-                        _searchController.text.isNotEmpty,
-                        l10n,
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        itemCount: _filteredBookmarks.length,
-                        itemBuilder: (context, index) {
-                          final bookmark = _filteredBookmarks[index];
-                          return _buildBookmarkCard(
-                            context,
-                            provider,
-                            bookmark,
-                            l10n,
-                          );
-                        },
-                      ),
-              ),
+              Expanded(child: _buildSearchResults(context, provider, l10n)),
             ],
           ),
         );
@@ -274,8 +306,7 @@ class _BookmarksPageState extends State<BookmarksPage> {
     );
   }
 
-  Widget _buildHeader(
-      BuildContext context, int count, AppLocalizations l10n) {
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Row(
@@ -294,7 +325,7 @@ class _BookmarksPageState extends State<BookmarksPage> {
               ],
             ),
             child: const Icon(
-              LucideIcons.bookMarked,
+              LucideIcons.search,
               color: Colors.indigo,
               size: 28,
             ),
@@ -304,7 +335,7 @@ class _BookmarksPageState extends State<BookmarksPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                l10n.bookmarksTitle,
+                l10n.globalSearchTitle,
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -313,7 +344,7 @@ class _BookmarksPageState extends State<BookmarksPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                l10n.bookmarksCount(count),
+                l10n.globalSearchSubtitle,
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey.shade500,
@@ -334,10 +365,10 @@ class _BookmarksPageState extends State<BookmarksPage> {
       child: TextField(
         controller: _searchController,
         onChanged: (value) {
-          _filterBookmarks(provider.bookmarks);
+          _performSearch(value, provider.bibleData);
         },
         decoration: InputDecoration(
-          hintText: l10n.bookmarksSearchPlaceholder,
+          hintText: l10n.globalSearchPlaceholder,
           hintStyle: TextStyle(color: Colors.grey.shade400),
           prefixIcon: const Icon(LucideIcons.search, color: Colors.grey),
           suffixIcon: _searchController.text.isNotEmpty
@@ -345,7 +376,9 @@ class _BookmarksPageState extends State<BookmarksPage> {
                   icon: const Icon(LucideIcons.x, color: Colors.grey),
                   onPressed: () {
                     _searchController.clear();
-                    _filterBookmarks(provider.bookmarks);
+                    setState(() {
+                      _searchResults = [];
+                    });
                   },
                 )
               : null,
@@ -368,8 +401,53 @@ class _BookmarksPageState extends State<BookmarksPage> {
     );
   }
 
-  Widget _buildEmptyState(
-      BuildContext context, bool isSearching, AppLocalizations l10n) {
+  Widget _buildSearchResults(
+      BuildContext context, AppProvider provider, AppLocalizations l10n) {
+    if (_searchController.text.isEmpty) {
+      return _buildEmptySearchState(context, l10n);
+    }
+
+    if (_isSearching) {
+      return Center(
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(l10n.globalSearchSearching),
+        ],
+      ));
+    }
+
+    if (_searchResults.isEmpty) {
+      return _buildNoResultsState(context, l10n);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+          child: Text(
+            l10n.globalSearchCount(_searchResults.length),
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            itemCount: _searchResults.length,
+            itemBuilder: (context, index) {
+              final verse = _searchResults[index];
+              return _buildSearchResultCard(context, provider, verse);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptySearchState(BuildContext context, AppLocalizations l10n) {
     return Center(
       child: Container(
         margin: const EdgeInsets.all(24),
@@ -383,10 +461,10 @@ class _BookmarksPageState extends State<BookmarksPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(LucideIcons.book, size: 64, color: Colors.grey.shade200),
+            Icon(LucideIcons.search, size: 64, color: Colors.grey.shade200),
             const SizedBox(height: 24),
             Text(
-              isSearching ? l10n.globalSearchEmpty : l10n.bookmarksEmpty,
+              l10n.globalSearchPlaceholder,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
@@ -400,39 +478,76 @@ class _BookmarksPageState extends State<BookmarksPage> {
     );
   }
 
-  Widget _buildBookmarkCard(
+  Widget _buildNoResultsState(BuildContext context, AppLocalizations l10n) {
+    return Center(
+      child: Container(
+        margin: const EdgeInsets.all(24),
+        padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 40),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.grey.shade100, width: 1.5),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.search, size: 64, color: Colors.grey.shade200),
+            const SizedBox(height: 24),
+            Text(
+              l10n.globalSearchEmpty,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade400,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchResultCard(
     BuildContext context,
     AppProvider provider,
-    Bookmark bookmark,
-    AppLocalizations l10n,
+    BibleVerse verse,
   ) {
-    final bookName = _getLocalizedBookName(context, bookmark.bookId);
+    final bookName = _getLocalizedBookName(context, verse.bookId);
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.grey.shade100, width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
-            blurRadius: 15,
-            offset: const Offset(0, 6),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(20),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () => provider.goToReaderPage(
-              provider.bibleData.indexWhere((b) => b.id == bookmark.bookId),
-              bookmark.chapter,
-              bookmark.startVerse - 1,
-            ),
+            onTap: () {
+              provider.goToReaderPage(
+                verse.bookIndex,
+                verse.chapterIndex,
+                verse.verseIndex,
+              );
+              // Navigate back to reader
+              Provider.of<AppProvider>(context, listen: false).currentTabIndex =
+                  0;
+            },
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -446,62 +561,41 @@ class _BookmarksPageState extends State<BookmarksPage> {
                         ),
                         decoration: BoxDecoration(
                           color: Colors.indigo.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          '$bookName ${bookmark.chapter + 1}:${bookmark.startVerse}',
+                          l10n.globalSearchResultFormat(
+                            bookName,
+                            (verse.chapterIndex + 1).toString(),
+                            (verse.verseIndex + 1).toString(),
+                          ),
                           style: const TextStyle(
                             color: Colors.indigo,
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 12,
                           ),
                         ),
                       ),
-                      Row(
-                        children: [
-                          IconButton(
-                            visualDensity: VisualDensity.compact,
-                            icon: Icon(
-                              LucideIcons.trash2,
-                              size: 18,
-                              color: Colors.red.shade300,
-                            ),
-                            onPressed: () => provider.toggleBookmark(
-                              bookmark.range,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            LucideIcons.chevronRight,
-                            size: 18,
-                            color: Colors.grey,
-                          ),
-                        ],
+                      const Icon(
+                        LucideIcons.chevronRight,
+                        size: 18,
+                        color: Colors.grey,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // We need to fetch the verse text dynamically
-                  FutureBuilder<String>(
-                    future: _fetchVerseText(
-                        provider, bookmark.bookId, bookmark.chapter, bookmark.startVerse),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const LinearProgressIndicator();
-                      } else if (snapshot.hasError) {
-                        return Text('Error: ${snapshot.error}');
-                      } else {
-                        return Text(
-                          snapshot.data ?? 'Verse not found',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            height: 1.6,
-                            color: Color(0xFF334155),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        );
-                      }
-                    },
+                  const SizedBox(height: 12),
+                  RichText(
+                    text: _highlightSearchTerm(
+                      verse.text,
+                      _searchController.text,
+                      context,
+                    ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    strutStyle: const StrutStyle(
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
                   ),
                 ],
               ),
@@ -510,11 +604,5 @@ class _BookmarksPageState extends State<BookmarksPage> {
         ),
       ),
     );
-  }
-
-  Future<String> _fetchVerseText(
-      AppProvider provider, String bookId, int chapter, int verse) async {
-    final book = provider.bibleData.firstWhere((b) => b.id == bookId);
-    return book.chapters[chapter][verse - 1];
   }
 }

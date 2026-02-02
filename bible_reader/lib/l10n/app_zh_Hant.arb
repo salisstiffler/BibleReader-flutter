@@ -1,40 +1,193 @@
 {
     "@@locale": "zh_Hant",
-    "appTitle": "聖經閱讀器",
-    "readTab": "閱讀",
-    "bookmarksTab": "書籤",
-    "notesTab": "筆記",
-    "settingsTab": "設定",
-    "settingsTitle": "個人化設定",
+    "appTitle": "聖經閱讀",
+    "navRead": "閱讀",
+    "navBookmarks": "書籤",
+    "navNotes": "筆記",
+    "navSearch": "搜索",
+    "navSettings": "我的",
+    "settingsTitle": "個性化設置",
     "settingsSubtitle": "打造最適合您的靈修閱讀環境",
-    "localizationSection": "語言預設",
-    "visualStyleSection": "視覺風格",
-    "lightTheme": "明亮",
-    "darkTheme": "深色",
-    "sepiaTheme": "懷舊",
-    "readingControlsSection": "閱讀及朗讀",
-    "typographySize": "字體縮放",
-    "speechRate": "朗讀速率",
-    "continuousReading": "沉浸式連續播放",
-    "continuousReadingSubtitle": "朗讀完當前經文後自動進入下一節，適合閉目靈修。",
-    "pauseOnChapterSwitch": "切換章節時暫停",
-    "pauseOnChapterSwitchSubtitle": "手動切換章節時自動暫停播放，包括點擊上/下一章按鈕。",
-    "selectChapter": "選擇章節",
-    "previousChapter": "上一章",
-    "nextChapter": "下一章",
-    "listenChapter": "朗讀本章",
-    "pauseListening": "暫停",
-    "dailyWisdom": "每日箴言",
-    "writeYourSpiritualReflection": "寫下你的靈修感悟...",
-    "bookNotFound": "未找到此書",
-    "chapterOrVerseOutOfBounds": "章節或經文超出範圍",
-    "ttsError": "語音朗讀錯誤",
-    "invalidDeepLinkParameters": "無效的深層鏈接參數。",
-    "simplifiedChinese": "簡體",
-    "traditionalChinese": "繁體",
-    "english": "English",
-    "noBookmarksYet": "尚無書籤。從閱讀頁面添加書籤。",
-    "noNotesYet": "尚無筆記。從閱讀頁面添加筆記。",
+    "settingsUiLanguage": "語言預設",
+    "settingsVisualStyle": "視覺風格",
+    "settingsReadingControls": "閱讀及朗讀",
+    "settingsFontSize": "字體大小",
+    "settingsReadingEffect": "閱讀模式",
+    "settingsAnimationEffect": "翻頁效果",
+    "settingsCustomBg": "自定義背景",
+    "settingsAccentColor": "主題色調",
+    "settingsSpeechRate": "朗讀速率",
+    "settingsContinuousReading": "沉浸式連續播放",
+    "settingsContinuousReadingDesc": "朗讀完當前經文後自動進入下一節，適合閉目靈修。",
+    "settingsPauseOnSwitch": "切換章節時暫停",
+    "settingsPauseOnSwitchDesc": "手動切換章節時自動暫停播放，包括點擊上/下一章按鈕。",
+    "settingsThemeLight": "明亮",
+    "settingsThemeDark": "深色",
+    "settingsThemeSepia": "護眼",
+    "settingsFontFamily": "字體樣式",
+    "settingsLineHeight": "行高比例",
+    "settingsEffectsScroll": "縱向滾動",
+    "settingsEffectsHorizontal": "橫向滑屏",
+    "settingsEffectsPageFlip": "全屏頁碼",
+    "settingsEffectsPaginated": "全屏模式",
+    "settingsAnimationsNone": "無",
+    "settingsAnimationsFade": "漸隱",
+    "settingsAnimationsSlide": "滑屏",
+    "settingsAnimationsCurl": "仿真",
+    "settingsFontsSerif": "襯線體 (宣講)",
+    "settingsFontsSans": "無襯線 (現代)",
+    "settingsFontsKai": "優美楷體",
+    "settingsFontsRounded": "精緻圓體",
+    "readerDailyWisdom": "今日靈修經文",
+    "readerAppTitle": "聖經閱讀",
+    "readerMenu": "目錄",
+    "readerChapterSelect": "{book} • 第 {chapter} 章",
+    "@readerChapterSelect": {
+        "placeholders": {
+            "book": {},
+            "chapter": {}
+        }
+    },
+    "readerRangeSelect": "範圍選擇",
+    "readerSelectStartEnd": "選擇起始和結束節",
+    "readerVerseSingle": "第 {verse} 節",
+    "@readerVerseSingle": {
+        "placeholders": {
+            "verse": {}
+        }
+    },
+    "readerVerseRange": "第 {start}-{end} 節",
+    "@readerVerseRange": {
+        "placeholders": {
+            "start": {},
+            "end": {}
+        }
+    },
+    "readerBookmark": "收藏",
+    "readerStop": "停止",
+    "readerListen": "朗讀",
+    "readerPlayChapter": "播全章",
+    "readerHighlight": "高亮",
+    "readerAddNote": "添加筆記...",
+    "readerReading": "正在朗讀",
+    "readerPrevChapter": "上一章",
+    "readerNextChapter": "下一章",
+    "readerFullscreenReader": "進入全屏閱讀",
+    "readerExitFullscreen": "退出全屏",
+    "readerNotePlaceholder": "在這裡寫下您的靈修感悟...",
+    "readerShare": "分享經文",
+    "readerShareSuccess": "經文和鏈接已複製到剪貼板!",
+    "readerDrawerBooks": "目錄",
+    "readerDrawerTitle": "目錄",
+    "readerNote": "筆記",
+    "commonSave": "保存",
+    "commonCancel": "取消",
+    "commonClose": "關閉",
+    "commonExpand": "顯示全文",
+    "commonCollapse": "收起",
+    "bookmarksTitle": "經文收藏",
+    "bookmarksCount": "已珍藏 {count} 條靈糧",
+    "@bookmarksCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksEmpty": "書籤欄空空的，開啟您的讀經之旅吧",
+    "bookmarksSearchPlaceholder": "搜索收藏的經文...",
+    "bookmarksEdit": "編輯",
+    "bookmarksSelectedCount": "已選擇 {count} 項",
+    "@bookmarksSelectedCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksBatchDelete": "批量刪除 ({count})",
+    "@bookmarksBatchDelete": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksSelectAll": "全選",
+    "bookmarksReverseSelect": "反選",
+    "bookmarksDeleteConfirm": "確定刪除選中的 {count} 條書籤嗎?",
+    "@bookmarksDeleteConfirm": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksCancel": "取消",
+    "bookmarksConfirm": "確定刪除",
+    "notesTitle": "靈修筆記",
+    "notesCount": "已記錄 {count} 段感悟",
+    "@notesCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesSearchPlaceholder": "搜索您的筆記或感悟...",
+    "notesEmpty": "筆尖未動,感悟從讀經開始",
+    "notesEdit": "編輯",
+    "notesSelectedCount": "已選擇 {count} 項",
+    "@notesSelectedCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesBatchDelete": "批量刪除 ({count})",
+    "@notesBatchDelete": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesSelectAll": "全選",
+    "notesReverseSelect": "反選",
+    "notesDeleteConfirm": "確定刪除選中的 {count} 條筆記嗎?",
+    "@notesDeleteConfirm": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesCancel": "取消",
+    "notesConfirm": "確定刪除",
+    "globalSearchTitle": "全局搜索",
+    "globalSearchSubtitle": "搜尋聖經中的真理與智慧",
+    "globalSearchPlaceholder": "輸入關鍵字搜索經文內容...",
+    "globalSearchCount": "共找到 {count} 處經文",
+    "@globalSearchCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "globalSearchEmpty": "未搜索到相關經文，換個詞試試吧",
+    "globalSearchSearching": "正在查考經卷...",
+    "globalSearchResultFormat": "{book} {chapter}:{verse}",
+    "@globalSearchResultFormat": {
+        "placeholders": {
+            "book": {},
+            "chapter": {},
+            "verse": {}
+        }
+    },
+    "authLoginTitle": "歡迎回來",
+    "authRegisterTitle": "創建賬號",
+    "authLoginDesc": "登錄以在不同設備間同步您的閱讀進度和記錄",
+    "authRegisterDesc": "開啟雲端同步，開啟您的靈修之旅",
+    "authUsernamePlaceholder": "用戶名",
+    "authPasswordPlaceholder": "密碼",
+    "authLoginBtn": "立即登錄",
+    "authRegisterBtn": "註冊賬號",
+    "authNoAccount": "還沒有賬號？",
+    "authHasAccount": "已有賬號？",
+    "authSwitchRegister": "去註冊",
+    "authSwitchLogin": "去登錄",
+    "authLoggedIn": "賬號已同步",
+    "authLogout": "退出登錄",
+    "authGuestUser": "訪客",
+    "authSyncActive": "雲端同步已激活",
+    "authSyncPrompt": "登錄以同步您的數據",
+    "simplifiedChinese": "简体中文",
+    "traditionalChinese": "繁體中文",
+    "english": "英語",
     "bookGn": "創世記",
     "bookEx": "出埃及記",
     "bookLv": "利未記",

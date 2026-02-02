@@ -12,16 +12,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'Holy Read';
 
   @override
-  String get readTab => 'Read';
+  String get navRead => 'Read';
 
   @override
-  String get bookmarksTab => 'Bookmarks';
+  String get navBookmarks => 'Bookmarks';
 
   @override
-  String get notesTab => 'Notes';
+  String get navNotes => 'Notes';
 
   @override
-  String get settingsTab => 'Settings';
+  String get navSearch => 'Search';
+
+  @override
+  String get navSettings => 'Mine';
 
   @override
   String get settingsTitle => 'Preferences';
@@ -30,93 +33,366 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSubtitle => 'Configure your perfect reading environment';
 
   @override
-  String get localizationSection => 'Localization';
+  String get settingsUiLanguage => 'Localization';
 
   @override
-  String get visualStyleSection => 'Visual Style';
+  String get settingsVisualStyle => 'Visual Style';
 
   @override
-  String get lightTheme => 'Light';
+  String get settingsReadingControls => 'Reading & Audio';
 
   @override
-  String get darkTheme => 'Dark';
+  String get settingsFontSize => 'Font Size';
 
   @override
-  String get sepiaTheme => 'Sepia';
+  String get settingsReadingEffect => 'Reading Mode';
 
   @override
-  String get readingControlsSection => 'Reading Controls';
+  String get settingsAnimationEffect => 'Page Animation';
 
   @override
-  String get typographySize => 'Typography Size';
+  String get settingsCustomBg => 'Custom Background';
 
   @override
-  String get speechRate => 'Speech Rate';
+  String get settingsAccentColor => 'Accent Color';
 
   @override
-  String get continuousReading => 'Continuous Reading';
+  String get settingsSpeechRate => 'Speech Speed';
 
   @override
-  String get continuousReadingSubtitle =>
-      'Auto-play subsequent verses for hands-free study.';
+  String get settingsContinuousReading => 'Continuous Playback';
 
   @override
-  String get pauseOnChapterSwitch => 'Pause on Chapter Switch';
+  String get settingsContinuousReadingDesc =>
+      'Automatically advance to the next verse, ideal for focused meditation.';
 
   @override
-  String get pauseOnChapterSwitchSubtitle =>
-      'Automatically pause playback when manually switching chapters.';
+  String get settingsPauseOnSwitch => 'Pause on Module Switch';
 
   @override
-  String get selectChapter => 'Select Chapter';
+  String get settingsPauseOnSwitchDesc =>
+      'Automatically pause playback when manually changing chapters.';
 
   @override
-  String get previousChapter => 'Previous';
+  String get settingsThemeLight => 'Light';
 
   @override
-  String get nextChapter => 'Next';
+  String get settingsThemeDark => 'Dark';
 
   @override
-  String get listenChapter => 'Listen Chapter';
+  String get settingsThemeSepia => 'Sepia';
 
   @override
-  String get pauseListening => 'Pause';
+  String get settingsFontFamily => 'Font Family';
 
   @override
-  String get dailyWisdom => 'Daily Wisdom';
+  String get settingsLineHeight => 'Line Spacing';
 
   @override
-  String get writeYourSpiritualReflection =>
-      'Write your spiritual reflection...';
+  String get settingsEffectsScroll => 'Vertical Scroll';
 
   @override
-  String get bookNotFound => 'Book not found';
+  String get settingsEffectsHorizontal => 'Horizontal Slide';
 
   @override
-  String get chapterOrVerseOutOfBounds => 'Chapter or verse out of bounds';
+  String get settingsEffectsPageFlip => 'Full Screen';
 
   @override
-  String get ttsError => 'TTS Error';
+  String get settingsEffectsPaginated => 'Book Mode';
 
   @override
-  String get invalidDeepLinkParameters => 'Invalid deep link parameters.';
+  String get settingsAnimationsNone => 'None';
 
   @override
-  String get simplifiedChinese => 'Simplified';
+  String get settingsAnimationsFade => 'Fade';
 
   @override
-  String get traditionalChinese => 'Traditional';
+  String get settingsAnimationsSlide => 'Slide';
+
+  @override
+  String get settingsAnimationsCurl => 'Curl';
+
+  @override
+  String get settingsFontsSerif => 'Serif (Classic)';
+
+  @override
+  String get settingsFontsSans => 'Sans (Modern)';
+
+  @override
+  String get settingsFontsKai => 'Kaiti (Elegant)';
+
+  @override
+  String get settingsFontsRounded => 'Rounded (Soft)';
+
+  @override
+  String get readerDailyWisdom => 'Daily Wisdom';
+
+  @override
+  String get readerAppTitle => 'Holy Read';
+
+  @override
+  String get readerMenu => 'Books';
+
+  @override
+  String readerChapterSelect(Object book, Object chapter) {
+    return '$book • Ch. $chapter';
+  }
+
+  @override
+  String get readerRangeSelect => 'Range Select';
+
+  @override
+  String get readerSelectStartEnd => 'Select start and end verses';
+
+  @override
+  String readerVerseSingle(Object verse) {
+    return 'Verse $verse';
+  }
+
+  @override
+  String readerVerseRange(Object start, Object end) {
+    return 'Verses $start-$end';
+  }
+
+  @override
+  String get readerBookmark => 'Bookmark';
+
+  @override
+  String get readerStop => 'Stop';
+
+  @override
+  String get readerListen => 'Listen';
+
+  @override
+  String get readerPlayChapter => 'Play Chapter';
+
+  @override
+  String get readerHighlight => 'Highlight';
+
+  @override
+  String get readerAddNote => 'Add a note...';
+
+  @override
+  String get readerReading => 'Reading...';
+
+  @override
+  String get readerPrevChapter => 'Previous';
+
+  @override
+  String get readerNextChapter => 'Next';
+
+  @override
+  String get readerFullscreenReader => 'Fullscreen Reader';
+
+  @override
+  String get readerExitFullscreen => 'Exit Fullscreen';
+
+  @override
+  String get readerNotePlaceholder => 'Write your spiritual reflection...';
+
+  @override
+  String get readerShare => 'Share Bible Verse';
+
+  @override
+  String get readerShareSuccess => 'Verse and link copied to clipboard!';
+
+  @override
+  String get readerDrawerBooks => 'Books';
+
+  @override
+  String get readerDrawerTitle => 'Books';
+
+  @override
+  String get readerNote => 'Note';
+
+  @override
+  String get commonSave => 'Save';
+
+  @override
+  String get commonCancel => 'Cancel';
+
+  @override
+  String get commonClose => 'Close';
+
+  @override
+  String get commonExpand => 'Show Full';
+
+  @override
+  String get commonCollapse => 'Collapse';
+
+  @override
+  String get bookmarksTitle => 'Bookmarks';
+
+  @override
+  String bookmarksCount(Object count) {
+    return 'You have $count saved verses';
+  }
+
+  @override
+  String get bookmarksEmpty => 'No bookmarks yet.';
+
+  @override
+  String get bookmarksSearchPlaceholder => 'Search bookmarks...';
+
+  @override
+  String get bookmarksEdit => 'Edit';
+
+  @override
+  String bookmarksSelectedCount(Object count) {
+    return '$count Selected';
+  }
+
+  @override
+  String bookmarksBatchDelete(Object count) {
+    return 'Delete Selected ($count)';
+  }
+
+  @override
+  String get bookmarksSelectAll => 'Select All';
+
+  @override
+  String get bookmarksReverseSelect => 'Reverse Select';
+
+  @override
+  String bookmarksDeleteConfirm(Object count) {
+    return 'Delete these $count bookmarks?';
+  }
+
+  @override
+  String get bookmarksCancel => 'Cancel';
+
+  @override
+  String get bookmarksConfirm => 'Delete';
+
+  @override
+  String get notesTitle => 'Spiritual Notes';
+
+  @override
+  String notesCount(Object count) {
+    return 'Reflecting on $count insights';
+  }
+
+  @override
+  String get notesSearchPlaceholder => 'Search notes...';
+
+  @override
+  String get notesEmpty => 'No notes found.';
+
+  @override
+  String get notesEdit => 'Edit';
+
+  @override
+  String notesSelectedCount(Object count) {
+    return '$count Selected';
+  }
+
+  @override
+  String notesBatchDelete(Object count) {
+    return 'Delete Selected ($count)';
+  }
+
+  @override
+  String get notesSelectAll => 'Select All';
+
+  @override
+  String get notesReverseSelect => 'Reverse Select';
+
+  @override
+  String notesDeleteConfirm(Object count) {
+    return 'Delete these $count notes?';
+  }
+
+  @override
+  String get notesCancel => 'Cancel';
+
+  @override
+  String get notesConfirm => 'Delete';
+
+  @override
+  String get globalSearchTitle => 'Global Search';
+
+  @override
+  String get globalSearchSubtitle => 'Search for Truth and Wisdom in the Bible';
+
+  @override
+  String get globalSearchPlaceholder =>
+      'Enter keywords to search verse content...';
+
+  @override
+  String globalSearchCount(Object count) {
+    return 'Found $count verses';
+  }
+
+  @override
+  String get globalSearchEmpty => 'No verses found. Try different keywords.';
+
+  @override
+  String get globalSearchSearching => 'Searching the scriptures...';
+
+  @override
+  String globalSearchResultFormat(Object book, Object chapter, Object verse) {
+    return '$book $chapter:$verse';
+  }
+
+  @override
+  String get authLoginTitle => 'Welcome Back';
+
+  @override
+  String get authRegisterTitle => 'Create Account';
+
+  @override
+  String get authLoginDesc => 'Sign in to sync your data across devices';
+
+  @override
+  String get authRegisterDesc => 'Start your spiritual journey with cloud sync';
+
+  @override
+  String get authUsernamePlaceholder => 'Username';
+
+  @override
+  String get authPasswordPlaceholder => 'Password';
+
+  @override
+  String get authLoginBtn => 'Sign In';
+
+  @override
+  String get authRegisterBtn => 'Create Account';
+
+  @override
+  String get authNoAccount => 'Don\'t have an account?';
+
+  @override
+  String get authHasAccount => 'Already have an account?';
+
+  @override
+  String get authSwitchRegister => 'Sign Up';
+
+  @override
+  String get authSwitchLogin => 'Login';
+
+  @override
+  String get authLoggedIn => 'Account synced';
+
+  @override
+  String get authLogout => 'Log Out';
+
+  @override
+  String get authGuestUser => 'Guest User';
+
+  @override
+  String get authSyncActive => 'Cloud sync active';
+
+  @override
+  String get authSyncPrompt => 'Sign in to sync your data';
+
+  @override
+  String get simplifiedChinese => 'Simplified Chinese';
+
+  @override
+  String get traditionalChinese => 'Traditional Chinese';
 
   @override
   String get english => 'English';
-
-  @override
-  String get noBookmarksYet =>
-      'No bookmarks yet. Bookmark verses from the Reader page.';
-
-  @override
-  String get noNotesYet =>
-      'No notes yet. Add notes to verses from the Reader page.';
 
   @override
   String get bookGn => 'Genesis';
@@ -218,7 +494,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bookMi => 'Micah';
 
   @override
-  String get bookNa => 'Nahum';
+  String get bookNa => 'Naum';
 
   @override
   String get bookHk => 'Habakkuk';

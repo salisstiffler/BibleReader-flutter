@@ -1,40 +1,193 @@
 {
     "@@locale": "en",
     "appTitle": "Holy Read",
-    "readTab": "Read",
-    "bookmarksTab": "Bookmarks",
-    "notesTab": "Notes",
-    "settingsTab": "Settings",
+    "navRead": "Read",
+    "navBookmarks": "Bookmarks",
+    "navNotes": "Notes",
+    "navSearch": "Search",
+    "navSettings": "Mine",
     "settingsTitle": "Preferences",
     "settingsSubtitle": "Configure your perfect reading environment",
-    "localizationSection": "Localization",
-    "visualStyleSection": "Visual Style",
-    "lightTheme": "Light",
-    "darkTheme": "Dark",
-    "sepiaTheme": "Sepia",
-    "readingControlsSection": "Reading Controls",
-    "typographySize": "Typography Size",
-    "speechRate": "Speech Rate",
-    "continuousReading": "Continuous Reading",
-    "continuousReadingSubtitle": "Auto-play subsequent verses for hands-free study.",
-    "pauseOnChapterSwitch": "Pause on Chapter Switch",
-    "pauseOnChapterSwitchSubtitle": "Automatically pause playback when manually switching chapters.",
-    "selectChapter": "Select Chapter",
-    "previousChapter": "Previous",
-    "nextChapter": "Next",
-    "listenChapter": "Listen Chapter",
-    "pauseListening": "Pause",
-    "dailyWisdom": "Daily Wisdom",
-    "writeYourSpiritualReflection": "Write your spiritual reflection...",
-    "bookNotFound": "Book not found",
-    "chapterOrVerseOutOfBounds": "Chapter or verse out of bounds",
-    "ttsError": "TTS Error",
-    "invalidDeepLinkParameters": "Invalid deep link parameters.",
-    "simplifiedChinese": "Simplified",
-    "traditionalChinese": "Traditional",
+    "settingsUiLanguage": "Localization",
+    "settingsVisualStyle": "Visual Style",
+    "settingsReadingControls": "Reading & Audio",
+    "settingsFontSize": "Font Size",
+    "settingsReadingEffect": "Reading Mode",
+    "settingsAnimationEffect": "Page Animation",
+    "settingsCustomBg": "Custom Background",
+    "settingsAccentColor": "Accent Color",
+    "settingsSpeechRate": "Speech Speed",
+    "settingsContinuousReading": "Continuous Playback",
+    "settingsContinuousReadingDesc": "Automatically advance to the next verse, ideal for focused meditation.",
+    "settingsPauseOnSwitch": "Pause on Module Switch",
+    "settingsPauseOnSwitchDesc": "Automatically pause playback when manually changing chapters.",
+    "settingsThemeLight": "Light",
+    "settingsThemeDark": "Dark",
+    "settingsThemeSepia": "Sepia",
+    "settingsFontFamily": "Font Family",
+    "settingsLineHeight": "Line Spacing",
+    "settingsEffectsScroll": "Vertical Scroll",
+    "settingsEffectsHorizontal": "Horizontal Slide",
+    "settingsEffectsPageFlip": "Full Screen",
+    "settingsEffectsPaginated": "Book Mode",
+    "settingsAnimationsNone": "None",
+    "settingsAnimationsFade": "Fade",
+    "settingsAnimationsSlide": "Slide",
+    "settingsAnimationsCurl": "Curl",
+    "settingsFontsSerif": "Serif (Classic)",
+    "settingsFontsSans": "Sans (Modern)",
+    "settingsFontsKai": "Kaiti (Elegant)",
+    "settingsFontsRounded": "Rounded (Soft)",
+    "readerDailyWisdom": "Daily Wisdom",
+    "readerAppTitle": "Holy Read",
+    "readerMenu": "Books",
+    "readerChapterSelect": "{book} • Ch. {chapter}",
+    "@readerChapterSelect": {
+        "placeholders": {
+            "book": {},
+            "chapter": {}
+        }
+    },
+    "readerRangeSelect": "Range Select",
+    "readerSelectStartEnd": "Select start and end verses",
+    "readerVerseSingle": "Verse {verse}",
+    "@readerVerseSingle": {
+        "placeholders": {
+            "verse": {}
+        }
+    },
+    "readerVerseRange": "Verses {start}-{end}",
+    "@readerVerseRange": {
+        "placeholders": {
+            "start": {},
+            "end": {}
+        }
+    },
+    "readerBookmark": "Bookmark",
+    "readerStop": "Stop",
+    "readerListen": "Listen",
+    "readerPlayChapter": "Play Chapter",
+    "readerHighlight": "Highlight",
+    "readerAddNote": "Add a note...",
+    "readerReading": "Reading...",
+    "readerPrevChapter": "Previous",
+    "readerNextChapter": "Next",
+    "readerFullscreenReader": "Fullscreen Reader",
+    "readerExitFullscreen": "Exit Fullscreen",
+    "readerNotePlaceholder": "Write your spiritual reflection...",
+    "readerShare": "Share Bible Verse",
+    "readerShareSuccess": "Verse and link copied to clipboard!",
+    "readerDrawerBooks": "Books",
+    "readerDrawerTitle": "Books",
+    "readerNote": "Note",
+    "commonSave": "Save",
+    "commonCancel": "Cancel",
+    "commonClose": "Close",
+    "commonExpand": "Show Full",
+    "commonCollapse": "Collapse",
+    "bookmarksTitle": "Bookmarks",
+    "bookmarksCount": "You have {count} saved verses",
+    "@bookmarksCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksEmpty": "No bookmarks yet.",
+    "bookmarksSearchPlaceholder": "Search bookmarks...",
+    "bookmarksEdit": "Edit",
+    "bookmarksSelectedCount": "{count} Selected",
+    "@bookmarksSelectedCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksBatchDelete": "Delete Selected ({count})",
+    "@bookmarksBatchDelete": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksSelectAll": "Select All",
+    "bookmarksReverseSelect": "Reverse Select",
+    "bookmarksDeleteConfirm": "Delete these {count} bookmarks?",
+    "@bookmarksDeleteConfirm": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "bookmarksCancel": "Cancel",
+    "bookmarksConfirm": "Delete",
+    "notesTitle": "Spiritual Notes",
+    "notesCount": "Reflecting on {count} insights",
+    "@notesCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesSearchPlaceholder": "Search notes...",
+    "notesEmpty": "No notes found.",
+    "notesEdit": "Edit",
+    "notesSelectedCount": "{count} Selected",
+    "@notesSelectedCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesBatchDelete": "Delete Selected ({count})",
+    "@notesBatchDelete": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesSelectAll": "Select All",
+    "notesReverseSelect": "Reverse Select",
+    "notesDeleteConfirm": "Delete these {count} notes?",
+    "@notesDeleteConfirm": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "notesCancel": "Cancel",
+    "notesConfirm": "Delete",
+    "globalSearchTitle": "Global Search",
+    "globalSearchSubtitle": "Search for Truth and Wisdom in the Bible",
+    "globalSearchPlaceholder": "Enter keywords to search verse content...",
+    "globalSearchCount": "Found {count} verses",
+    "@globalSearchCount": {
+        "placeholders": {
+            "count": {}
+        }
+    },
+    "globalSearchEmpty": "No verses found. Try different keywords.",
+    "globalSearchSearching": "Searching the scriptures...",
+    "globalSearchResultFormat": "{book} {chapter}:{verse}",
+    "@globalSearchResultFormat": {
+        "placeholders": {
+            "book": {},
+            "chapter": {},
+            "verse": {}
+        }
+    },
+    "authLoginTitle": "Welcome Back",
+    "authRegisterTitle": "Create Account",
+    "authLoginDesc": "Sign in to sync your data across devices",
+    "authRegisterDesc": "Start your spiritual journey with cloud sync",
+    "authUsernamePlaceholder": "Username",
+    "authPasswordPlaceholder": "Password",
+    "authLoginBtn": "Sign In",
+    "authRegisterBtn": "Create Account",
+    "authNoAccount": "Don't have an account?",
+    "authHasAccount": "Already have an account?",
+    "authSwitchRegister": "Sign Up",
+    "authSwitchLogin": "Login",
+    "authLoggedIn": "Account synced",
+    "authLogout": "Log Out",
+    "authGuestUser": "Guest User",
+    "authSyncActive": "Cloud sync active",
+    "authSyncPrompt": "Sign in to sync your data",
+    "simplifiedChinese": "Simplified Chinese",
+    "traditionalChinese": "Traditional Chinese",
     "english": "English",
-    "noBookmarksYet": "No bookmarks yet. Bookmark verses from the Reader page.",
-    "noNotesYet": "No notes yet. Add notes to verses from the Reader page.",
     "bookGn": "Genesis",
     "bookEx": "Exodus",
     "bookLv": "Leviticus",
@@ -68,7 +221,7 @@
     "bookOb": "Obadiah",
     "bookJn": "Jonah",
     "bookMi": "Micah",
-    "bookNa": "Nahum",
+    "bookNa": "Naum",
     "bookHk": "Habakkuk",
     "bookZp": "Zephaniah",
     "bookHg": "Haggai",
