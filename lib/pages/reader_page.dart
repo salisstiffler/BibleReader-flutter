@@ -598,8 +598,8 @@ class _VerseWidgetState extends State<_VerseWidget> {
                       child: RichText(
                         text: TextSpan(
                           style: TextStyle(
-                            fontSize: 18,
-                            height: 1.6,
+                            fontSize: provider.fontSize,
+                            height: provider.lineHeight,
                             color: isBeingRead
                                 ? Theme.of(context).primaryColor
                                 : Theme.of(context).textTheme.bodyLarge?.color,
@@ -839,6 +839,7 @@ class _DailyVerseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bookName = getLocalizedBookName(context, verse.bookId);
+    final provider = Provider.of<AppProvider>(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
       padding: const EdgeInsets.all(24),
@@ -862,30 +863,30 @@ class _DailyVerseCard extends StatelessWidget {
         children: [
           Text(
             l10n.readerDailyWisdom,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           const SizedBox(height: 16),
           Text(
             '“${verse.text}”',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              height: 1.5,
-            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontSize: provider.fontSize,
+                  fontWeight: FontWeight.bold,
+                  height: provider.lineHeight,
+                ),
           ),
           const SizedBox(height: 20),
           Align(
             alignment: Alignment.bottomRight,
             child: Text(
               '— $bookName ${verse.chapterIndex + 1}:${verse.verseIndex + 1}',
-              style: const TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Colors.white70,
-                fontSize: 14,
+                fontSize: provider.fontSize > 14 ? provider.fontSize - 2 : 14,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1141,7 +1142,7 @@ class _NavigationDrawerState extends State<_NavigationDrawer>
     return SlideTransition(
       position: _slideAnimation,
       child: Drawer(
-        width: MediaQuery.of(context).size.width * 0.85,
+        width: min(MediaQuery.of(context).size.width * 0.85, 420),
         child: Column(
           children: [
             Padding(

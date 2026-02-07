@@ -53,47 +53,49 @@ class SettingsPage extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _SettingsPageHelper.buildGlassmorphismCard(
                   context,
-                  child: Column(
-                    children: [
-                      _SettingsPageHelper.buildThemeButtons(
-                          context, provider, l10n),
-                      const SizedBox(height: 20),
-                      _SettingsPageHelper.buildAccentColorControl(
-                          context, provider, l10n),
-                    ],
-                  ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SettingsPageHelper.buildThemeButtons(
+                            context, provider, l10n),
+                        const SizedBox(height: 20),
+                        _SettingsPageHelper.buildAccentColorControl(
+                            context, provider, l10n),
+                      ],
+                    ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _SettingsPageHelper.buildSectionTitle(context,
-                    LucideIcons.activity, l10n.settingsReadingControls),
+                    LucideIcons.activity, '阅读'),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _SettingsPageHelper.buildGlassmorphismCard(
                   context,
-                  child: Column(
-                    children: [
-                      _SettingsPageHelper.buildFontSizeControl(
-                          context, provider, l10n),
-                      const SizedBox(height: 24),
-                      _SettingsPageHelper.buildLineHeightControl(
-                          context, provider, l10n),
-                      const SizedBox(height: 24),
-                      _SettingsPageHelper.buildFontFamilyControl(
-                          context, provider, l10n),
-                      const SizedBox(height: 24),
-                      _SettingsPageHelper.buildPageTurnEffectControl(
-                          context, provider, l10n),
-                    ],
-                  ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _SettingsPageHelper.buildFontSizeControl(
+                            context, provider, l10n),
+                        const SizedBox(height: 24),
+                        _SettingsPageHelper.buildLineHeightControl(
+                            context, provider, l10n),
+                        const SizedBox(height: 24),
+                        _SettingsPageHelper.buildFontFamilyControl(
+                            context, provider, l10n),
+                        const SizedBox(height: 24),
+                        _SettingsPageHelper.buildPageTurnEffectControl(
+                            context, provider, l10n),
+                      ],
+                    ),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: _SettingsPageHelper.buildSectionTitle(context,
-                    LucideIcons.audioLines, l10n.settingsReadingControls),
+                    LucideIcons.book, 'TTS朗读'),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -222,23 +224,20 @@ class _SettingsPageHelper {
 
   static Widget buildSectionTitle(
       BuildContext context, IconData icon, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Theme.of(context).primaryColor),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).primaryColor,
-              letterSpacing: 1.2,
-            ),
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Theme.of(context).primaryColor),
+        const SizedBox(width: 8),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: Theme.of(context).primaryColor,
+            letterSpacing: 1.2,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -316,14 +315,20 @@ class _SettingsPageHelper {
   static Widget buildThemeButtons(
       BuildContext context, AppProvider provider, AppLocalizations l10n) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisSize: MainAxisSize.max,
       children: [
-        _SettingsPageHelper.buildThemeButton(context, provider, AppTheme.light,
-            l10n.settingsThemeLight, LucideIcons.sun),
-        _SettingsPageHelper.buildThemeButton(context, provider, AppTheme.dark,
-            l10n.settingsThemeDark, LucideIcons.moon),
-        _SettingsPageHelper.buildThemeButton(context, provider, AppTheme.sepia,
-            l10n.settingsThemeSepia, LucideIcons.book),
+        Expanded(
+          child: _SettingsPageHelper.buildThemeButton(
+              context, provider, AppTheme.light, l10n.settingsThemeLight, LucideIcons.sun),
+        ),
+        Expanded(
+          child: _SettingsPageHelper.buildThemeButton(
+              context, provider, AppTheme.dark, l10n.settingsThemeDark, LucideIcons.moon),
+        ),
+        Expanded(
+          child: _SettingsPageHelper.buildThemeButton(
+              context, provider, AppTheme.sepia, l10n.settingsThemeSepia, LucideIcons.eye),
+        ),
       ],
     );
   }
@@ -336,43 +341,48 @@ class _SettingsPageHelper {
     IconData icon,
   ) {
     final isActive = provider.theme == theme;
+    // Use provider.accentColor as the highlight for selected state
+    Color accentColor;
+    try {
+      accentColor = Color(int.parse('0xFF${provider.accentColor.substring(1)}'));
+    } catch (_) {
+      accentColor = Theme.of(context).primaryColor;
+    }
+
     return GestureDetector(
       onTap: () => provider.theme = theme,
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: theme
-                  .getThemeData(
-                    accentColor: provider.accentColor,
-                  )
-                  .scaffoldBackgroundColor,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(
-                color: isActive
-                    ? Theme.of(context).primaryColor
-                    : theme
-                        .getThemeData(
-                          accentColor: provider.accentColor,
-                        )
-                        .dividerColor,
-                width: 3,
-              ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: isActive
+              ? Border.all(color: accentColor, width: 2)
+              : null,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 24,
+              color: isActive
+                  ? accentColor
+                  : Theme.of(context).textTheme.bodyLarge?.color,
             ),
-            child: Icon(icon,
-                color: theme
-                    .getThemeData(
-                      accentColor: provider.accentColor,
-                    )
-                    .textTheme
-                    .bodyLarge
-                    ?.color),
-          ),
-          const SizedBox(height: 8),
-          Text(label, style: Theme.of(context).textTheme.bodySmall)
-        ],
+            const SizedBox(height: 8),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: isActive ? accentColor : null,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
+                  ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -401,28 +411,39 @@ class _SettingsPageHelper {
         ),
         const SizedBox(height: 12),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 16,
+          runSpacing: 16,
           children: colors.map((color) {
             final isActive = provider.accentColor == color;
+            final colorValue = Color(int.parse('0xFF${color.substring(1)}'));
             return InkWell(
               onTap: () => provider.accentColor = color,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(50),
               child: Container(
-                width: 40,
-                height: 40,
+                width: 32,
+                height: 32,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(14),
-                  color: Color(int.parse('0xFF${color.substring(1)}')),
-                  border: Border.all(
-                    color: isActive
-                        ? (provider.theme == AppTheme.dark
-                            ? Colors.white
-                            : Colors.black)
-                        : Colors.transparent,
-                    width: 3,
-                  ),
+                  shape: BoxShape.circle,
+                  color: isActive ? Colors.transparent : colorValue,
+                  border: isActive
+                      ? Border.all(
+                          color: colorValue,
+                          width: 2,
+                        )
+                      : null,
                 ),
+                child: isActive
+                    ? Center(
+                        child: Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: colorValue,
+                          ),
+                        ),
+                      )
+                    : null,
               ),
             );
           }).toList(),
@@ -526,10 +547,11 @@ class _SettingsPageHelper {
   static Widget buildFontFamilyControl(
       BuildContext context, AppProvider provider, AppLocalizations l10n) {
     final families = {
-      'sans': l10n.settingsFontsSans,
-      'serif': l10n.settingsFontsSerif,
-      'kai': l10n.settingsFontsKai,
-      'rounded': l10n.settingsFontsRounded,
+      'default': l10n.settingsFontsSans,
+      'shoushu': '扶摇手书',
+      'songkai': '宋刻楷体',
+      'bai ge': '天行体',
+      'heiti': '刚正黑',
     };
     return _SettingsPageHelper.buildSegmentedControl(
       context: context,

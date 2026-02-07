@@ -59,7 +59,7 @@ class AppProvider with ChangeNotifier {
   bool _continuousReading = false;
   double _playbackRate = 1.0;
   double _lineHeight = 1.6;
-  String _fontFamily = 'sans'; // 'sans', 'serif', 'kai', 'rounded'
+  String _fontFamily = 'default'; // 'default', 'shoushu', 'songkai', 'bai ge', 'heiti'
   String _accentColor = '#6366f1'; // Default indigo color
   String _pageTurnEffect = 'curl'; // 'none', 'fade', 'slide', 'curl'
   int _loopCount = 1;
@@ -669,6 +669,11 @@ class AppProvider with ChangeNotifier {
 
   void clearTargetVerse() {
     _targetVerseIndex = null;
+  }
+
+  void setTargetVerseIndex(int verseIndex) {
+    _targetVerseIndex = verseIndex;
+    notifyListeners();
   }
 
   Locale _getLocaleFromCode(String code) {

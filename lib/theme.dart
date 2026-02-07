@@ -9,13 +9,36 @@ enum AppTheme {
 
   ThemeData getThemeData({
     required String accentColor,
+    String? fontKey,
   }) {
     final Color primaryColor = Color(int.parse('0xFF${accentColor.substring(1)}'));
+
+    // Map logical font keys to actual font family names.
+    // Options: 'default' (system), 'shoushu', 'songkai', 'bai ge', 'heiti'
+    String? fontFamily;
+    switch (fontKey) {
+      case 'shoushu':
+        fontFamily = 'ShouShu';
+        break;
+      case 'songkai':
+        fontFamily = 'SongKai';
+        break;
+      case 'bai ge':
+        fontFamily = 'BaiGe';
+        break;
+      case 'heiti':
+        fontFamily = 'HeiTi';
+        break;
+      default:
+        // 'default' or null - use system default
+        fontFamily = null;
+    }
 
     switch (this) {
       case AppTheme.light:
         return ThemeData(
           brightness: Brightness.light,
+          fontFamily: fontFamily,
           primaryColor: primaryColor,
           scaffoldBackgroundColor: const Color(0xFFffffff),
           cardColor: const Color(0xFFf9fafb),
@@ -46,6 +69,7 @@ enum AppTheme {
       case AppTheme.dark:
         return ThemeData(
           brightness: Brightness.dark,
+          fontFamily: fontFamily,
           primaryColor: primaryColor,
           scaffoldBackgroundColor: const Color(0xFF111827),
           cardColor: const Color(0xFF1f2937),
@@ -76,6 +100,7 @@ enum AppTheme {
       case AppTheme.sepia:
         return ThemeData(
           brightness: Brightness.light,
+          fontFamily: fontFamily,
           primaryColor: primaryColor,
           scaffoldBackgroundColor: const Color(0xFFf4ecd8),
           cardColor: const Color(0xFFeaddca),
