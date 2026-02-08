@@ -14,6 +14,16 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+// Prefer environment variables for CI; fall back to key.properties; then defaults
+val envStoreFile = System.getenv("KEYSTORE_PATH")
+val envStorePassword = System.getenv("KEYSTORE_PASSWORD")
+val envKeyAlias = System.getenv("KEY_ALIAS") ?: System.getenv("KEY_ALIAS_NAME")
+val envKeyPassword = System.getenv("KEY_PASSWORD")
+
+fun propOrEnv(propName: String, envValue: String?, default: String): String {
+    return envValue ?: keystoreProperties.getProperty(propName, default)
+}
+
 
 android {
     namespace = "com.berlin.bible_reader"
@@ -43,16 +53,18 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file(keystoreProperties.getProperty("storeFile", "upload-keystore.jks"))
-            storePassword = keystoreProperties.getProperty("storePassword", "123456")
-            keyAlias = keystoreProperties.getProperty("keyAlias", "bible")
-            keyPassword = keystoreProperties.getProperty("keyPassword", "123456")
+            val storeFilePath = propOrEnv("storeFile", envStoreFile, "upload-keystore.jks")
+            storeFile = file(storeFilePath)
+            storePassword = propOrEnv("storePassword", envStorePassword, "123456")
+            keyAlias = propOrEnv("keyAlias", envKeyAlias, "bible")
+            keyPassword = propOrEnv("keyPassword", envKeyPassword, "123456")
         }
         getByName("debug") { // Configure the existing debug signing config
-            storeFile = file(keystoreProperties.getProperty("storeFile", "upload-keystore.jks"))
-            storePassword = keystoreProperties.getProperty("storePassword", "123456")
-            keyAlias = keystoreProperties.getProperty("keyAlias", "bible")
-            keyPassword = keystoreProperties.getProperty("keyPassword", "123456")
+            val storeFilePath = propOrEnv("storeFile", envStoreFile, "upload-keystore.jks")
+            storeFile = file(storeFilePath)
+            storePassword = propOrEnv("storePassword", envStorePassword, "123456")
+            keyAlias = propOrEnv("keyAlias", envKeyAlias, "bible")
+            keyPassword = propOrEnv("keyPassword", envKeyPassword, "123456")
         }
     }
 
