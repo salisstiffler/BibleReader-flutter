@@ -100,9 +100,23 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
 
+      - name: Check build output
+        run: |
+          echo "=== Directory structure ==="
+          Get-ChildItem -Path build\windows\ -Recurse | Select-Object FullName
+        shell: powershell
+
       - name: Zip Windows build
         run: |
-          powershell -Command "Compress-Archive -Path build\windows\runner\Release\* -DestinationPath build\windows\release.zip -Force"
+          if (Test-Path "build\windows\runner\Release") {
+            Compress-Archive -Path "build\windows\runner\Release\*" -DestinationPath "build\windows\release.zip" -Force
+          } elseif (Test-Path "build\windows\x64\runner\Release") {
+            Compress-Archive -Path "build\windows\x64\runner\Release\*" -DestinationPath "build\windows\release.zip" -Force
+          } else {
+            echo "Build output directory not found"
+            exit 1
+          }
+        shell: powershell
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
