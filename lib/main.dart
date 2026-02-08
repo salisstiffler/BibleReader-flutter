@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'dart:async';
+import 'dart:ui';
  // Import generated AppLocalizations
 
 import 'l10n/app_localizations.dart';
@@ -14,6 +15,7 @@ import 'pages/search_page.dart';
 import 'pages/settings_page.dart';
 import 'providers/app_provider.dart';
 import 'services/deeplink_service.dart';
+import 'services/version_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,6 +110,227 @@ class _AppShellState extends State<AppShell> {
         _initialDeepLinkProcessed = true;
       });
     }
+
+    // Check for app updates on startup
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkForUpdates();
+    });
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      final versionInfo = await VersionService.checkForUpdates();
+      if (!mounted) return;
+
+      if (versionInfo.hasUpdate) {
+        _showUpdateDialogFromMain(versionInfo);
+      }
+    } catch (e) {
+      // Silently fail, don't show error to user on startup
+    }
+  }
+
+  void _showUpdateDialogFromMain(VersionInfo versionInfo) {
+    showDialog(
+      context: context,
+      barrierDismissible: !versionInfo.isForceUpdate,
+      builder: (BuildContext dialogContext) {
+        return PopScope(
+          canPop: !versionInfo.isForceUpdate,
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(dialogContext)
+                      .scaffoldBackgroundColor
+                      .withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.download,
+                              size: 28,
+                              color: Theme.of(dialogContext).primaryColor),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '发现新版本',
+                                  style: Theme.of(dialogContext)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                if (versionInfo.isForceUpdate)
+                                  Text(
+                                    '(强制更新)',
+                                    style: Theme.of(dialogContext)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.red.withOpacity(0.7),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(dialogContext)
+                              .primaryColor
+                              .withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Theme.of(dialogContext)
+                                .primaryColor
+                                .withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${versionInfo.currentVersion} → ',
+                              style: Theme.of(dialogContext)
+                                  .textTheme
+                                  .bodyMedium,
+                            ),
+                            Text(
+                            versionInfo.versionName,
+                              style: Theme.of(dialogContext)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(dialogContext).primaryColor,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        '更新内容:',
+                        style: Theme.of(dialogContext)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          versionInfo.updateInfo,
+                          style: Theme.of(dialogContext).textTheme.bodySmall,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (!versionInfo.isForceUpdate)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(dialogContext),
+                                style: OutlinedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(
+                                  '稍后更新',
+                                  style: TextStyle(
+                                    color:
+                                        Theme.of(dialogContext).primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(dialogContext);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  backgroundColor:
+                                      Theme.of(dialogContext).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  '立即更新',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // For force update, just close (in real scenario, launch browser)
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor:
+                                  Theme.of(dialogContext).primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              '立即更新',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _setupDeepLinkListener() {

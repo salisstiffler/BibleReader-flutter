@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:lucide_flutter/lucide_flutter.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui'; // Import dart:ui for ImageFilter
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:open_file/open_file.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/app_provider.dart';
 import '../theme.dart';
+import '../services/version_service.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -701,9 +705,19 @@ class _SettingsPageHelper {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
-            'v1.0.0 • Designed in Digital Sanctuary',
-            style: Theme.of(context).textTheme.bodySmall,
+          GestureDetector(
+            onTap: () => _showCheckUpdateDialog(context, l10n),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text(
+                'v1.0.0 • Designed in Digital Sanctuary',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).primaryColor,
+                    ),
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           Text(
@@ -712,6 +726,698 @@ class _SettingsPageHelper {
                 Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 10),
           ),
         ],
+      ),
+    );
+  }
+
+  static void _showCheckUpdateDialog(
+      BuildContext context, AppLocalizations l10n) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(height: 16),
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 24),
+                    Text(
+                      '正在检查更新...',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      final versionInfo = await VersionService.checkForUpdates();
+      if (!context.mounted) return;
+
+      Navigator.pop(context);
+
+      if (versionInfo.hasUpdate) {
+        _showUpdateAvailableDialog(context, versionInfo);
+      } else {
+        _showNoUpdateDialog(context, versionInfo.currentVersion);
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      _showErrorDialog(context, '检查更新失败: $e');
+    }
+  }
+
+  static void _showUpdateAvailableDialog(
+      BuildContext context, VersionInfo versionInfo) {
+    showDialog(
+      context: context,
+      barrierDismissible: !versionInfo.isForceUpdate, // Cannot dismiss if force update
+      builder: (BuildContext context) {
+        return PopScope(
+          canPop: !versionInfo.isForceUpdate, // Prevent back button on force update
+          child: Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .scaffoldBackgroundColor
+                      .withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.2),
+                    width: 1.5,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(LucideIcons.download,
+                              size: 28,
+                              color: Theme.of(context).primaryColor),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '发现新版本',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                if (versionInfo.isForceUpdate)
+                                  Text(
+                                    '(强制更新)',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(
+                                          color: Colors.red.withOpacity(0.7),
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: Theme.of(context).primaryColor.withOpacity(0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${versionInfo.currentVersion} → ',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            Text(
+                              versionInfo.versionName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        '更新内容:',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelLarge
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          versionInfo.updateInfo,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (!versionInfo.isForceUpdate)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: OutlinedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: Text(
+                                  '稍后更新',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _launchUpdate(context, versionInfo.fileUrl);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  backgroundColor:
+                                      Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  '立即更新',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _launchUpdate(context, versionInfo.fileUrl);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor: Theme.of(context).primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              '立即更新',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static void _showNoUpdateDialog(BuildContext context, String currentVersion) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.check,
+                      size: 48,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '已是最新版本',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '当前版本: v$currentVersion',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('确定'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.info,
+                      size: 48,
+                      color: Colors.red.withOpacity(0.7),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '检查更新失败',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('返回'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static Future<void> _launchUpdate(
+      BuildContext context, String downloadUrl) async {
+    try {
+      // Show progress dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return _DownloadProgressDialog(downloadUrl: downloadUrl);
+        },
+      );
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context); // Close progress dialog
+        _showErrorDialog(context, '启动更新失败: $e');
+      }
+    }
+  }
+}
+
+class _DownloadProgressDialog extends StatefulWidget {
+  final String downloadUrl;
+
+  const _DownloadProgressDialog({
+    super.key,
+    required this.downloadUrl,
+  });
+
+  @override
+  State<_DownloadProgressDialog> createState() => _DownloadProgressDialogState();
+}
+
+class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
+  late Dio _dio;
+  double _downloadProgress = 0.0;
+  bool _isDownloading = true;
+  String _statusMessage = '正在下载更新文件...';
+  bool _downloadSuccess = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _dio = Dio();
+    _startDownload();
+  }
+
+  Future<void> _startDownload() async {
+    try {
+      // Get download directory
+      final directory = await getApplicationDocumentsDirectory();
+      final downloadPath = '${directory.path}/app_update.apk';
+
+      if (kDebugMode) {
+        print('[UpdateDownload] Starting download from: ${widget.downloadUrl}');
+        print('[UpdateDownload] Download path: $downloadPath');
+      }
+
+      // Download file
+      await _dio.download(
+        widget.downloadUrl,
+        downloadPath,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            setState(() {
+              _downloadProgress = received / total;
+              _statusMessage = '${((_downloadProgress * 100).toStringAsFixed(1))}%';
+            });
+
+            if (kDebugMode) {
+              print('[UpdateDownload] Progress: ${_statusMessage}');
+            }
+          }
+        },
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _isDownloading = false;
+        _downloadSuccess = true;
+        _statusMessage = '下载完成，准备安装...';
+      });
+
+      // Wait a moment then open the file for installation
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (!mounted) return;
+
+      // Open the APK file to trigger installation
+      final result = await OpenFile.open(downloadPath);
+      
+      if (kDebugMode) {
+        print('[UpdateDownload] OpenFile result: ${result.type}');
+      }
+
+      if (result.type == ResultType.done) {
+        // Installation dialog opened successfully
+        if (mounted) {
+          Navigator.pop(context); // Close the progress dialog
+          _showInstallationSuccessDialog();
+        }
+      } else {
+        // Failed to open file
+        if (mounted) {
+          Navigator.pop(context);
+          _SettingsPageHelper._showErrorDialog(
+            context,
+            '无法打开安装文件，请尝试手动安装: $downloadPath',
+          );
+        }
+      }
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isDownloading = false;
+        _statusMessage = '下载失败: $e';
+      });
+
+      if (kDebugMode) {
+        print('[UpdateDownload] Error: $e');
+      }
+
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        Navigator.pop(context);
+        _SettingsPageHelper._showErrorDialog(context, '下载更新失败: $e');
+      }
+    }
+  }
+
+  void _showInstallationSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .scaffoldBackgroundColor
+                    .withOpacity(0.9),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.check,
+                      size: 48,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      '安装已启动',
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '请按照系统提示完成安装',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('好的'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .scaffoldBackgroundColor
+                .withOpacity(0.9),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1.5,
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_isDownloading)
+                  Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: LinearProgressIndicator(
+                          minHeight: 8,
+                          value: _downloadProgress,
+                          backgroundColor: Colors.grey.withOpacity(0.2),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        '正在下载...',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _statusMessage,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  )
+                else if (_downloadSuccess)
+                  Column(
+                    children: [
+                      Icon(
+                        LucideIcons.check,
+                        size: 48,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '下载完成',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        '正在准备安装...',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  )
+                else
+                  Column(
+                    children: [
+                      Icon(
+                        LucideIcons.info,
+                        size: 48,
+                        color: Colors.red.withOpacity(0.7),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        '下载失败',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _statusMessage,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
