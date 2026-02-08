@@ -5,10 +5,21 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
+val keystorePropertiesFile = rootProject.file("key.properties")
+val keystoreProperties = Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+
 android {
     namespace = "com.berlin.bible_reader"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -30,10 +41,26 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(keystoreProperties.getProperty("storeFile", "upload-keystore.jks"))
+            storePassword = keystoreProperties.getProperty("storePassword", "123456")
+            keyAlias = keystoreProperties.getProperty("keyAlias", "bible")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "123456")
+        }
+        getByName("debug") { // Configure the existing debug signing config
+            storeFile = file(keystoreProperties.getProperty("storeFile", "upload-keystore.jks"))
+            storePassword = keystoreProperties.getProperty("storePassword", "123456")
+            keyAlias = keystoreProperties.getProperty("keyAlias", "bible")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "123456")
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
